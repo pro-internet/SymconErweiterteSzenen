@@ -5,8 +5,10 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		//Never delete this line!
 		parent::Create();
 
-		//Properties
-		$this->RegisterPropertyInteger("SceneCount", 3);
+		if(@$this->RegisterPropertyString("Namen") !== false)
+		{
+			$this->RegisterPropertyString("Namen","init");
+		}
 		
 		if(!IPS_VariableProfileExists("SZS.SceneControl")){
 			IPS_CreateVariableProfile("SZS.SceneControl", 1);
@@ -29,31 +31,35 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		
 		$this->CreateCategoryByIdent($this->InstanceID, "Targets", "Targets");
 		
-		for($i = 1; $i <= $this->ReadPropertyInteger("SceneCount"); $i++) {
-			if(@IPS_GetObjectIDByIdent("Scene".$i, $this->InstanceID) === false){
-				//Scene
-				$vid = IPS_CreateVariable(1 /* Scene */);
-				IPS_SetParent($vid, $this->InstanceID);
-				IPS_SetName($vid, "Scene".$i);
-				IPS_SetIdent($vid, "Scene".$i);
-				IPS_SetVariableCustomProfile($vid, "SZS.SceneControl");
-				$this->EnableAction("Scene".$i);
-				SetValue($vid, 2);
-				//SceneData
-				$vid = IPS_CreateVariable(3 /* SceneData */);
-				IPS_SetParent($vid, $this->InstanceID);
-				IPS_SetName($vid, "Scene".$i."Data");
-				IPS_SetIdent($vid, "Scene".$i."Data");
-				IPS_SetHidden($vid, true);
-				
+		$data = $this->ReadPropertyString("Namen");
+		if($data != "init")
+		{
+			for($i = 1; $i <= $this->ReadPropertyInteger("SceneCount"); $i++) {
+				if(@IPS_GetObjectIDByIdent("Scene".$i, $this->InstanceID) === false){
+					//Scene
+					$vid = IPS_CreateVariable(1 /* Scene */);
+					IPS_SetParent($vid, $this->InstanceID);
+					IPS_SetName($vid, "Scene".$i);
+					IPS_SetIdent($vid, "Scene".$i);
+					IPS_SetVariableCustomProfile($vid, "SZS.SceneControl");
+					$this->EnableAction("Scene".$i);
+					SetValue($vid, 2);
+					//SceneData
+					$vid = IPS_CreateVariable(3 /* SceneData */);
+					IPS_SetParent($vid, $this->InstanceID);
+					IPS_SetName($vid, "Scene".$i."Data");
+					IPS_SetIdent($vid, "Scene".$i."Data");
+					IPS_SetHidden($vid, true);
+					
+				}
 			}
-		}
-		//Delete excessive Scences 
-		$ChildrenIDsCount = sizeof(IPS_GetChildrenIDs($this->InstanceID))/2;
-		if($ChildrenIDsCount > $this->ReadPropertyInteger("SceneCount")) {
-			for($j = $this->ReadPropertyInteger("SceneCount")+1; $j <= $ChildrenIDsCount; $j++) {
-				IPS_DeleteVariable(IPS_GetObjectIDByIdent("Scene".$j, $this->InstanceID));
-				IPS_DeleteVariable(IPS_GetObjectIDByIdent("Scene".$j."Data", $this->InstanceID));
+			//Delete excessive Scences 
+			$ChildrenIDsCount = sizeof(IPS_GetChildrenIDs($this->InstanceID))/2;
+			if($ChildrenIDsCount > $this->ReadPropertyInteger("SceneCount")) {
+				for($j = $this->ReadPropertyInteger("SceneCount")+1; $j <= $ChildrenIDsCount; $j++) {
+					IPS_DeleteVariable(IPS_GetObjectIDByIdent("Scene".$j, $this->InstanceID));
+					IPS_DeleteVariable(IPS_GetObjectIDByIdent("Scene".$j."Data", $this->InstanceID));
+				}
 			}
 		}
 	}
