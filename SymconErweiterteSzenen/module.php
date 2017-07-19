@@ -44,7 +44,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			}
 			else
 			{
-				IPS_CreateVariableProfile("ESZS.Selector");
+				IPS_CreateVariableProfile("ESZS.Selector", 1);
 			}
 			
 			//Events Category
