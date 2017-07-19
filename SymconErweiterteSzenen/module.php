@@ -6,7 +6,11 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		parent::Create();
 
 		//Properties
-		$this->RegisterPropertyInteger("SceneCount", 3);
+		if(@$this->RegisterPropertyString("Names") !== false)
+		{
+			$this->RegisterPropertyString("Names", "");
+			$this->CreateSetValueScript($this->InstanceID);
+		}
 		
 		if(!IPS_VariableProfileExists("SZS.SceneControl")){
 			IPS_CreateVariableProfile("SZS.SceneControl", 1);
@@ -28,32 +32,105 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		parent::ApplyChanges();
 		
 		$this->CreateCategoryByIdent($this->InstanceID, "Targets", "Targets");
+		$data = json_decode($this->ReadPropertyString("Names"),true);
 		
-		for($i = 1; $i <= $this->ReadPropertyInteger("SceneCount"); $i++) {
-			if(@IPS_GetObjectIDByIdent("Scene".$i, $this->InstanceID) === false){
-				//Scene
-				$vid = IPS_CreateVariable(1 /* Scene */);
+		if($data != "")
+		{
+			//Selector profile
+			if(IPS_VariableProfileExists("ESZS.Selector"))
+			{
+				IPS_DeleteVariableProfile("ESZS.Selector");
+				IPS_CreateVariableProfile("ESZS.Selector", 1);
+			}
+			
+			//Events Category
+			if(@IPS_GetObjectIDByIdent("EventsCat", $this->InstanceID) === false)
+			{
+				$eventsCat = IPS_CreateCategory();
+				IPS_SetName($eventsCat, "Events");
+				IPS_SetIdent($eventsCat, "EventsCat");
+				IPS_SetParent($eventsCat, $this->InstanceID);
+				IPS_SetHidden($eventsCat, true);
+			}
+			else
+			{
+				$eventsCat = IPS_GetObjectIDByIdent("EventsCat", $this->InstanceID);
+			}
+				
+			for($i = 1; $i <= sizeof($data); $i++) {
+				if(@IPS_GetObjectIDByIdent("Scene".$i, $this->InstanceID) === false){
+					//Scene
+					$vid = IPS_CreateVariable(1 /* Scene */);
+					SetValue($vid, 2);
+				} else
+				{
+					$vid = IPS_GetObjectIDByIdent("Scene".$i, $this->InstanceID);
+				}
 				IPS_SetParent($vid, $this->InstanceID);
-				IPS_SetName($vid, "Scene".$i);
+				IPS_SetName($vid, $data[$i - 1]['name']);
 				IPS_SetIdent($vid, "Scene".$i);
+				IPS_SetPosition($vid, $i);
 				IPS_SetVariableCustomProfile($vid, "SZS.SceneControl");
 				$this->EnableAction("Scene".$i);
-				SetValue($vid, 2);
-				//SceneData
-				$vid = IPS_CreateVariable(3 /* SceneData */);
+				
+				if(@IPS_GetObjectIDByIdent("Scene".$i."Data", $this->InstanceID) === false)
+				{
+					//SceneData
+					$vid = IPS_CreateVariable(3 /* SceneData */);
+				}
+				else
+				{
+					$vid = @IPS_GetObjectIDByIdent("Scene".$i."Data", $this->InstanceID);
+				}
 				IPS_SetParent($vid, $this->InstanceID);
-				IPS_SetName($vid, "Scene".$i."Data");
+				IPS_SetName($vid, $data[$i - 1]['name']."Data");
 				IPS_SetIdent($vid, "Scene".$i."Data");
+				IPS_SetPosition($vid, $i + sizeof($data));
 				IPS_SetHidden($vid, true);
 				
+				//Set Selector profile
+				IPS_SetVariableProfileAssociation("ESZS.Selector", ($i-1), $data[$i - 1]['name'],"",-1);
 			}
-		}
-		//Delete excessive Scences 
-		$ChildrenIDsCount = sizeof(IPS_GetChildrenIDs($this->InstanceID))/2;
-		if($ChildrenIDsCount > $this->ReadPropertyInteger("SceneCount")) {
-			for($j = $this->ReadPropertyInteger("SceneCount")+1; $j <= $ChildrenIDsCount; $j++) {
-				IPS_DeleteVariable(IPS_GetObjectIDByIdent("Scene".$j, $this->InstanceID));
-				IPS_DeleteVariable(IPS_GetObjectIDByIdent("Scene".$j."Data", $this->InstanceID));
+			//Selector Variable
+			if(@IPS_GetObjectIDByIdent("Selector", IPS_GetParent($this->InstanceID)) === false)
+			{
+				$vid = IPS_CreateVariable(1);
+			}
+			else
+			{
+				$vid = IPS_GetObjectIDByIdent("Selector", IPS_GetParent($this->InstanceID));
+			}
+			$svs = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
+			IPS_SetParent($vid, IPS_GetParent($this->InstanceID));
+			IPS_SetName($vid, "Select");
+			IPS_SetIdent($vid, "Selector");
+			IPS_SetPosition($vid, 1);
+			IPS_SetVariableCustomProfile($vid, "ESZS.Selector");
+			IPS_SetVariableCustomAction($vid, $svs);
+			
+			//Create Selector event
+			if(@IPS_GetObjectIDByIdent("SelectorOnChange", $eventsCat) === false)
+			{
+				$eid = IPS_CreateEvent(0);
+			}
+			else
+			{
+				$eid = IPS_GetObjectIDByIdent("SelectorOnChange", $eventsCat);
+			}
+			IPS_SetParent($eid, $eventsCat);
+			IPS_SetName($eid, "Selector.OnChange");
+			IPS_SetIdent($eid, "SelectorOnChange");
+			IPS_SetEventTrigger($eid, 0, $vid);
+			IPS_SetEventActive($eid, true);
+			IPS_SetEventScript($eid, "ESZS_CallScene(". $this->InstanceID .", GetValue($vid) + 1);");
+			
+			//Delete excessive Scences 
+			$ChildrenIDsCount = sizeof(IPS_GetChildrenIDs($this->InstanceID))/2 - 2;
+			if($ChildrenIDsCount > sizeof($data)) {
+				for($j = sizeof($data)+1; $j <= $ChildrenIDsCount; $j++) {
+					IPS_DeleteVariable(IPS_GetObjectIDByIdent("Scene".$j, $this->InstanceID));
+					IPS_DeleteVariable(IPS_GetObjectIDByIdent("Scene".$j."Data", $this->InstanceID));
+				}
 			}
 		}
 	}
@@ -119,8 +196,11 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 					
 					//Skip this device if we do not have a proper id
 					if($actionID < 10000)
+					{
+						SetValue($id, $value);
 						continue;
-					
+					}
+						
 					if(IPS_InstanceExists($actionID)) {
 						IPS_RequestAction($actionID, $o['ObjectIdent'], $value);
 					} else if(IPS_ScriptExists($actionID)) {
@@ -142,6 +222,27 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			 IPS_SetIdent($cid, $ident);
 		 }
 		 return $cid;
+	}
+	
+	private function CreateSetValueScript($parentID)
+	{
+		if(@IPS_GetObjectIDByIdent("SetValueScript", $parentID) === false)
+		{
+			$sid = IPS_CreateScript(0 /* PHP Script */);
+		}
+		else
+		{
+			$sid = IPS_GetObjectIDByIdent("SetValueScript", $parentID);
+		}
+		IPS_SetParent($sid, $parentID);
+			IPS_SetName($sid, "SetValue");
+			IPS_SetIdent($sid, "SetValueScript");
+			IPS_SetHidden($sid, true);
+			IPS_SetPosition($sid, 9999);			
+			IPS_SetScriptContent($sid, "<?
+SetValue(\$_IPS['VARIABLE'], \$_IPS['VALUE']); 
+?>");
+		return $sid;
 	}
 
 }
