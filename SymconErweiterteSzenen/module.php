@@ -129,7 +129,15 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			IPS_SetEventScript($eid, "ESZS_CallScene(". $this->InstanceID .", GetValue($vid) + 1);");
 			
 			//Delete excessive Scences 
-			$ChildrenIDsCount = sizeof(IPS_GetChildrenIDs($this->InstanceID))/2 - 3;
+			$ChildrenIDs = IPS_GetChildrenIDs($this->InstanceID);
+			$ChildrenIDsCount = 0;
+			foreach($ChildrenIDs as $child)
+			{
+				$ident = IPS_GetIdent($child);
+				if(strpos($ident, "Scene") !== false)
+					$ChildrenIDsCount++;
+			}
+			$ChildrenIDsCount = $ChildrenIDsCount/2;
 			if($ChildrenIDsCount > sizeof($data)) {
 				for($j = sizeof($data)+1; $j <= $ChildrenIDsCount; $j++) {
 					IPS_DeleteVariable(IPS_GetObjectIDByIdent("Scene".$j, $this->InstanceID));
