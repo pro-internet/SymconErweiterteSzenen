@@ -1,0 +1,14 @@
+{
+    "id": "{15585c27-bf87-4f53-8917-6625373a2151}",
+    "name": "ErweiterteSzenenSteuerung",
+    "type": 3,
+    "vendor": "",
+    "aliases": 
+    [
+        "ErweiterteSzenenSteuerung"
+    ],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [],
+    "prefix": "ESZS"
+}
