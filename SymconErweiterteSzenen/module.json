@@ -1,14 +1,14 @@
 {
-    "id": "{f02aca10-c2bd-442f-8b05-cd7905a1d865}",
-    "name": "ErweiterteSzenenSteuerung",
+    "id": "{87F46796-CC43-442D-94FD-AAA0BD8D9F54}",
+    "name": "SzenenSteuerung",
     "type": 3,
-    "vendor": "prointernet",
+    "vendor": "",
     "aliases": 
     [
-        "Erweiterte Szenensteuerung"
+        "SzenenSteuerung"
     ],
     "parentRequirements": [],
     "childRequirements": [],
     "implemented": [],
-    "prefix": "ESZS"
+    "prefix": "SZS"
 }

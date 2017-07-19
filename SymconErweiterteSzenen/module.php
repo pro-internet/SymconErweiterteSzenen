@@ -1,14 +1,12 @@
 <?
-class ErweiterteSzenenSteuerung extends IPSModule {
+class SzenenSteuerung extends IPSModule {
 
 	public function Create() {
 		//Never delete this line!
 		parent::Create();
 
-		if(@$this->RegisterPropertyString("Namen") !== false)
-		{
-			$this->RegisterPropertyString("Namen","init");
-		}
+		//Properties
+		$this->RegisterPropertyInteger("SceneCount", 3);
 		
 		if(!IPS_VariableProfileExists("SZS.SceneControl")){
 			IPS_CreateVariableProfile("SZS.SceneControl", 1);
@@ -31,35 +29,31 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		
 		$this->CreateCategoryByIdent($this->InstanceID, "Targets", "Targets");
 		
-		$data = $this->ReadPropertyString("Namen");
-		if($data != "init")
-		{
-			for($i = 1; $i <= $this->ReadPropertyInteger("SceneCount"); $i++) {
-				if(@IPS_GetObjectIDByIdent("Scene".$i, $this->InstanceID) === false){
-					//Scene
-					$vid = IPS_CreateVariable(1 /* Scene */);
-					IPS_SetParent($vid, $this->InstanceID);
-					IPS_SetName($vid, "Scene".$i);
-					IPS_SetIdent($vid, "Scene".$i);
-					IPS_SetVariableCustomProfile($vid, "SZS.SceneControl");
-					$this->EnableAction("Scene".$i);
-					SetValue($vid, 2);
-					//SceneData
-					$vid = IPS_CreateVariable(3 /* SceneData */);
-					IPS_SetParent($vid, $this->InstanceID);
-					IPS_SetName($vid, "Scene".$i."Data");
-					IPS_SetIdent($vid, "Scene".$i."Data");
-					IPS_SetHidden($vid, true);
-					
-				}
+		for($i = 1; $i <= $this->ReadPropertyInteger("SceneCount"); $i++) {
+			if(@IPS_GetObjectIDByIdent("Scene".$i, $this->InstanceID) === false){
+				//Scene
+				$vid = IPS_CreateVariable(1 /* Scene */);
+				IPS_SetParent($vid, $this->InstanceID);
+				IPS_SetName($vid, "Scene".$i);
+				IPS_SetIdent($vid, "Scene".$i);
+				IPS_SetVariableCustomProfile($vid, "SZS.SceneControl");
+				$this->EnableAction("Scene".$i);
+				SetValue($vid, 2);
+				//SceneData
+				$vid = IPS_CreateVariable(3 /* SceneData */);
+				IPS_SetParent($vid, $this->InstanceID);
+				IPS_SetName($vid, "Scene".$i."Data");
+				IPS_SetIdent($vid, "Scene".$i."Data");
+				IPS_SetHidden($vid, true);
+				
 			}
-			//Delete excessive Scences 
-			$ChildrenIDsCount = sizeof(IPS_GetChildrenIDs($this->InstanceID))/2;
-			if($ChildrenIDsCount > $this->ReadPropertyInteger("SceneCount")) {
-				for($j = $this->ReadPropertyInteger("SceneCount")+1; $j <= $ChildrenIDsCount; $j++) {
-					IPS_DeleteVariable(IPS_GetObjectIDByIdent("Scene".$j, $this->InstanceID));
-					IPS_DeleteVariable(IPS_GetObjectIDByIdent("Scene".$j."Data", $this->InstanceID));
-				}
+		}
+		//Delete excessive Scences 
+		$ChildrenIDsCount = sizeof(IPS_GetChildrenIDs($this->InstanceID))/2;
+		if($ChildrenIDsCount > $this->ReadPropertyInteger("SceneCount")) {
+			for($j = $this->ReadPropertyInteger("SceneCount")+1; $j <= $ChildrenIDsCount; $j++) {
+				IPS_DeleteVariable(IPS_GetObjectIDByIdent("Scene".$j, $this->InstanceID));
+				IPS_DeleteVariable(IPS_GetObjectIDByIdent("Scene".$j."Data", $this->InstanceID));
 			}
 		}
 	}
@@ -79,7 +73,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 	}
 
 	public function CallScene(int $SceneNumber){
-
+		
 		$this->CallValues("Scene".$SceneNumber);
 
 	}
@@ -111,7 +105,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 	private function CallValues($SceneIdent) {
 		
 		$data = wddx_deserialize(GetValue(IPS_GetObjectIDByIdent($SceneIdent."Data", $this->InstanceID)));
-
+		
 		if($data != NULL) {
 			foreach($data as $id => $value) {
 				if (IPS_VariableExists($id)){
@@ -122,18 +116,15 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 						$actionID = $v['VariableCustomAction'];
 					else
 						$actionID = $v['VariableAction'];
-			
+					
 					//Skip this device if we do not have a proper id
 					if($actionID < 10000)
-						{
-							SetValue($id, $value);
-							continue;
-						}
+						continue;
 					
 					if(IPS_InstanceExists($actionID)) {
 						IPS_RequestAction($actionID, $o['ObjectIdent'], $value);
 					} else if(IPS_ScriptExists($actionID)) {
-						echo IPS_RunScriptWaitEx($actionID, Array("VARIABLE" => $id, "VALUE" => $value, "SENDER" => "WebFront"));
+						echo IPS_RunScriptWaitEx($actionID, Array("VARIABLE" => $id, "VALUE" => $value));
 					}
 				}
 			}
