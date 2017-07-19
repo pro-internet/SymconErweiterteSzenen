@@ -1,11 +1,11 @@
 {
-    "id": "{87F46796-CC43-442D-94FD-AAA0BD8D9F54}",
-    "name": "SzenenSteuerung",
+    "id": "{40ef0c4b-bf66-4bf2-ac3a-36de7e4171c7}",
+    "name": "ErweiterteSzenenSteuerung",
     "type": 3,
     "vendor": "prointernet",
     "aliases": 
     [
-        "SzenenSteuerung"
+        "Erweiterte Szenensteuerung"
     ],
     "parentRequirements": [],
     "childRequirements": [],

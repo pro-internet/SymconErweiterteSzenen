@@ -1,5 +1,5 @@
 <?
-class SzenenSteuerung extends IPSModule {
+class ErweiterteSzenenSteuerung extends IPSModule {
 
 	public function Create() {
 		//Never delete this line!
