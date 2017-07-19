@@ -1,7 +1,26 @@
 {
   "elements":
   [
-	{ "type": "Label", "label": "Number of Scenes" },
-	{ "type": "NumberSpinner", "name": "SceneCount", "caption": "Scenes" }
+	{
+		"type": "List",
+		"name": "Namen",
+		"caption": "Namen:",
+		"rowCount": 5,
+		"add": true,
+		"delete": true,
+		"sort": {
+			"column": "name",
+			"direction": "ascending"
+		},
+		"columns": [{
+			"label": "Szenennamen",
+			"name": "Szenennamen", 
+			"width": "100px",
+			"add": "",
+			"edit": {
+				"type": "ValidationTextBox"
+			}
+		}]
+	}
   ]
 }
