@@ -42,6 +42,10 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				IPS_DeleteVariableProfile("ESZS.Selector");
 				IPS_CreateVariableProfile("ESZS.Selector", 1);
 			}
+			else
+			{
+				IPS_DeleteVariableProfile("ESZS.Selector");
+			}
 			
 			//Events Category
 			if(@IPS_GetObjectIDByIdent("EventsCat", $this->InstanceID) === false)
