@@ -1,9 +1,13 @@
 {
-    "id": "{b569b53e-f47c-4f20-837b-ef0d634d571a}",
-    "author": "prointernet",
-    "name": "prointernet ErweiterteSzenensteuerung",
-    "url": "www.prointernet.de",
-    "version": "1.0",
-    "build": 0,
-    "date": 0
+"id": "{b569b53e-f47c-4f20-837b-ef0d634d571a}",
+"author": "prointernet",
+"name": "prointernet SymconErweiterteSzenen",
+"url": "www.prointernet.de",
+"compatibility": {
+    "version": "4.2",
+    "date": 1500469125
+},
+"version": "1.0",
+"build": 0,
+"date": 0
 }
