@@ -43,6 +43,8 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		
 		if($data != "")
 		{
+			IPS_SetPosition($this->InstanceID, -700);
+			
 			//Selector profile
 			if(IPS_VariableProfileExists("ESZS.Selector" . $this->InstanceID))
 			{
@@ -123,7 +125,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			IPS_SetParent($vid, IPS_GetParent($this->InstanceID));
 			IPS_SetName($vid, IPS_GetName($this->InstanceID));
 			IPS_SetIdent($vid, "Selector");
-			IPS_SetPosition($vid, 1);
+			IPS_SetPosition($vid, 600);
 			IPS_SetVariableCustomProfile($vid, "ESZS.Selector" . $this->InstanceID);
 			IPS_SetVariableCustomAction($vid, $svs);
 			
@@ -206,6 +208,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				}
 				IPS_SetName($insID, "DaySets");
 				IPS_SetParent($insID, IPS_GetParent($this->InstanceID));
+				IPS_SetPosition($insID, -500);
 				IPS_SetIdent($insID, "Set");
 				
 				$sets = array("Früh","Morgen","Tag","Dämmerung","Abend");
@@ -290,10 +293,10 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 	public function CallScene(int $SceneNumber){
 		if($SceneNumber > 9999) //sender = Sensor
 		{
-			$sensorWert = GetValue($SceneNumber);
+			$sensorWert = GetValue($SceneNumber) - 1;
 			$setsIns = IPS_GetObjectIDByIdent("Set", IPS_GetParent($this->InstanceID));
 			$set = IPS_GetObjectIDByIdent("set$sensorWert", $setsIns);
-			$ActualSceneNumber = GetValue($set) + 1;
+			$ActualSceneNumber = GetValue($set);
 			$this->CallValues("Scene".$ActualSceneNumber."Sensor");
 		}
 		else
@@ -329,15 +332,17 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 	private function CallValues($SceneIdent) {
 		
 		$actualIdent = str_replace("Sensor", "", $SceneIdent);
+		$actualIdent = str_replace("Scene", "", $actualIdent);
+		$actualIdent++;
+		$actualIdent = "Scene". $actualIdent;
+		echo $actualIdent;
 		$data = wddx_deserialize(GetValue(IPS_GetObjectIDByIdent($actualIdent."Data", $this->InstanceID)));
-		
 		if($data != NULL) {
 			foreach($data as $id => $value) {
 				if(strpos($SceneIdent, "Sensor") !== false)
 				{
 					if(@IPS_GetObjectIDByIdent("Automatik", IPS_GetParent($this->InstanceID)) !== false)
 					{
-						echo "test";
 						$automatikID = IPS_GetObjectIDByIdent("Automatik", IPS_GetParent($this->InstanceID));
 						$auto = GetValue($automatikID);
 					}
@@ -365,7 +370,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 					if(IPS_InstanceExists($actionID)) {
 						IPS_RequestAction($actionID, $o['ObjectIdent'], $value);
 					} else if(IPS_ScriptExists($actionID)) {
-						echo IPS_RunScriptWaitEx($actionID, Array("VARIABLE" => $id, "VALUE" => $value));
+						echo IPS_RunScriptWaitEx($actionID, Array("VARIABLE" => $id, "VALUE" => $value, "SENDER" => "WebFront"));
 					}
 				}
 			}
