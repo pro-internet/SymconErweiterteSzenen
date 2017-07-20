@@ -25,17 +25,9 @@
 		 "edit": {
 		  	  "type": "ValidationTextBox"
 		  }
-		}, {
-		 "label": "Schaltung bei Sensorwert",
-		 "name": "SensorWert",
-		 "width": "100px",
-		 "add": 0,
-		 "visible": true,
-		 "edit": {
-		  	  "type": "ValidationTextBox"
-		  }
 		}
 	  ]
-	}
+	},
+	{ "type": "SelectVariable", "name": "Sensor", "caption": "Sensor" }
   ]
 }
