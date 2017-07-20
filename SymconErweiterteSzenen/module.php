@@ -1,6 +1,10 @@
 <?
 class ErweiterteSzenenSteuerung extends IPSModule {
 
+	/////////////
+	// Modular //
+	/////////////
+
 	public function Create() {
 		//Never delete this line!
 		parent::Create();
