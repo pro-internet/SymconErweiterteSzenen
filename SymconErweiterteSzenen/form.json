@@ -34,15 +34,6 @@
 		 "edit": {
 		  	  "type": "ValidationTextBox"
 		  }
-		}, {
-		 "label": "ID",
-		 "name": "ID",
-		 "width": "25px",
-		 "add": 0,
-		 "visible": true,
-		 "edit": {
-		  	  "type": "SelectVariable"
-		  }
 		}
 	  ]
 	}
