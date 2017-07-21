@@ -241,7 +241,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				IPS_SetPosition($insID, -500);
 				IPS_SetIdent($insID, "Set");
 				
-				$sets = array("Früh","Morgen","Tag","Dämmerung","Abend");
+				$sets = array("Früh","Morgen","Tag","Dämmerung","Abend","Nacht");
 				//Create the profile
 				if(IPS_VariableProfileExists("ESZS.Sets" . $this->InstanceID))
 				{
@@ -260,19 +260,27 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				foreach($sets as $i => $state)
 				{
 					if(@IPS_GetObjectIDByIdent("set$i", $insID) === false)
-					{
 						$vid = IPS_CreateVariable(1);
-					}
 					else
-					{
 						$vid = IPS_GetObjectIDByIdent("set$i", $insID);
-					}
 					IPS_SetName($vid, $state);
 					IPS_SetParent($vid, $insID);
 					IPS_SetPosition($vid, $i);
 					IPS_SetIdent($vid, "set$i");
 					IPS_SetVariableCustomAction($vid, $svs);
 					IPS_SetVariableCustomProfile($vid, "ESZS.Selector" . $this->InstanceID);
+					
+					//Create Events for the States
+					if(@IPS_GetObjectIDByIdent("SetEvent$i", $eventsCat) === false)
+						$eid = IPS_CreateEvent(0);
+					else
+						$eid = IPS_GetObjectIDByIdent("SetEvent$i", $eventsCat);
+					IPS_SetEventTrigger($eid, 1, $vid);
+					IPS_SetEventScript($eid, "ESZS_CallScene(" . $this->InstanceID . ", $sensorID);");
+					IPS_SetName($eid, "$state".".OnChange");
+					IPS_SetParent($eid, $eventsCat);
+					IPS_SetIdent($eid, "SetEvent$i");
+					IPS_SetEventActive($eid, true);
 				}
 			}
 			
