@@ -5,7 +5,7 @@
     "vendor": "prointernet",
     "aliases": 
     [
-        "Erweiterte Szenensteuerung"
+        "SzenenSteuerungDaySet"
     ],
     "parentRequirements": [],
     "childRequirements": [],
