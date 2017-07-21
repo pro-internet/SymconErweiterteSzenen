@@ -5,17 +5,26 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 	// Modular  //
 	/////////////
 
+	public function __construct($InstanceID) {
+		//Never delete this line!
+		parent::__construct($InstanceID);
+		
+		//config.json file location
+		$this->configFile = str_replace('\\scripts','',getcwd()) . '\\modules\\SymconSzenenDaySet\\docs\\config'. $this->InstanceID .'.json';
+		//config variable
+		if(@file_get_contents($this->configFile) === false)
+			fclose(fopen($this->configFile, "w"));
+		$this->config = json_decode(@file_get_contents($this->configFile));
+	}
+	
 	public function Create() {
 		//Never delete this line!
 		parent::Create();
 
 		//Properties
-		if(@$this->RegisterPropertyString("Names") !== false)
-		{
-			$this->RegisterPropertyString("Names", "");
-			$this->RegisterPropertyInteger("Sensor", 0);
-			$this->CreateSetValueScript($this->InstanceID);
-		}
+		$this->Register("Names", "");
+		$this->Register("Sensor", 0);
+		$this->CreateSetValueScript($this->InstanceID);
 		
 		if(!IPS_VariableProfileExists("SZS.SceneControl")){
 			IPS_CreateVariableProfile("SZS.SceneControl", 1);
@@ -35,12 +44,14 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 	public function ApplyChanges() {
 		//Never delete this line!
 		parent::ApplyChanges();
+		$this->SetConfig();
 		
 		$this->RemoveExcessiveProfiles("ESZS.Selector");
 		$this->RemoveExcessiveProfiles("ESZS.Sets");
 		$this->CreateCategoryByIdent($this->InstanceID, "Targets", "Targets");
-		$data = json_decode($this->ReadPropertyString("Names"),true);
 		
+		print_r($this->config);
+		$data = json_decode($this->config['Names']['value'],true);
 		if($data != "")
 		{
 			IPS_SetPosition($this->InstanceID, -700);
@@ -549,6 +560,626 @@ SetValue(\$_IPS['VARIABLE'], \$_IPS['VALUE']);
 				{
 					IPS_DeleteVariableProfile($profile);
 				}
+			}
+		}
+	}
+	
+	///////////////////////
+	//protected functions//
+	///////////////////////
+	
+	//Creates a Link With the in $content defined properties
+	protected function CreateLink($content)
+	{
+		/**
+		 * 
+		 * 
+		 * @param <array> $content 
+		 * 
+		 * @return <integer> $LinkID
+		 
+		$content = array("ObjectName" => "LinkName",
+						 "ParentID" => ParentID,
+						 "ObjectIdent" => "Identity",
+						 "TargetID" => TargetID,
+						 "ObjectInfo" => "Info", //optional
+						 "ObjectIsHidden" => Boolean, //optional
+						 "ObjectPosition" => position, //optional
+						 "ObjectIcon" => "Icon" //optional
+						)
+		 */
+		
+		$config = (array) $this->config;
+		$exists = IPS_ObjectExists($config[$content['ObjectIdent']]->value);
+		if(@IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["parentID"]) === false && (!array_key_exists($content['ObjectIdent'], $config) || !$exists))
+		{
+			$id = IPS_CreateLink();
+			IPS_SetName($id, $content['ObjectName']);
+			IPS_SetParent($id, $content['ParentID']);
+			IPS_SetIdent($id, $content['ObjectIdent']);
+			if(array_key_exists("ObjectInfo", $content))
+				IPS_SetInfo($id, $content["ObjectInfo"]);
+			if(array_key_exists("ObjectIsHidden", $content))
+				IPS_SetHidden($id, $content["ObjectIsHidden"]);
+			if(array_key_exists("ObjectPosition", $content))
+				IPS_SetPosition($id, $content["ObjectPosition"]);
+			if(array_key_exists("ObjectIcon", $content))
+				IPS_SetIcon($id, $content["ObjectIcon"]);
+			IPS_SetLinkTargetID($id, $content["TargetID"]);
+		}
+		else
+		{
+			if(@IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]) !== false)
+				$id = IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]);
+			else
+				$id = $config[$content["ObjectIdent"]]->value;
+		}
+		
+		$this->SetConfig($content["ObjectIdent"], array("value" => $id, "type" => "IPSObj"));
+		return $id;
+	}
+	
+	//Creates an Instance With the in $content defined properties
+	protected function CreateInstance($content)
+	{
+		/**
+		 * 
+		 * 
+		 * @param <array> $content 
+		 * 
+		 * @return <integer> $InstanceID
+		 
+		$content = array("ObjectName" => "InstanceName",
+						 "ParentID" => ParentID,
+						 "ObjectIdent" => "Identity",
+						 "ModuleName" => "Module Name", //optional, if ModuleID is set
+						 "ModuleID" => "GUID", //optional, if ModuleName is set
+						 "ObjectInfo" => "Info", //optional
+						 "ObjectIsHidden" => Boolean, //optional
+						 "ObjectPosition" => position, //optional
+						 "ObjectIcon" => "Icon" //optional
+						)
+		 */
+		 
+		$config = (array) $this->config;
+		$exists = IPS_ObjectExists($config[$content['ObjectIdent']]->value);
+		if(@IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]) === false && (!array_key_exists($content['ObjectIdent'], $config) || !$exists))
+		{
+			if(array_key_exists("ModuleID", $content)) //if the user already has that Module
+			{
+				if(IPS_ModuleExists($content['ModuleID']))
+					$id = IPS_CreateInstance($content['ModulID']);
+			}
+			else //if the user doesn't have that exact or a similar Module
+			{
+				$moduleList = IPS_GetModuleList();
+				foreach($moduleList as $moduleID)
+				{
+					if(IPS_GetModule($moduleID)['ModuleName'] == $content["ModuleName"])
+					{
+						$content["ModuleID"] = $moduleID;
+						break;
+					}
+				}
+			}
+			$id = IPS_CreateInstance($content['ModuleID']);
+			IPS_SetName($id, $content['ObjectName']);
+			IPS_SetParent($id, $content['ParentID']);
+			IPS_SetIdent($id, $content['ObjectIdent']);
+			if(array_key_exists("ObjectInfo", $content))
+				IPS_SetInfo($id, $content["ObjectInfo"]);
+			if(array_key_exists("ObjectIsHidden", $content))
+				IPS_SetHidden($id, $content["ObjectIsHidden"]);
+			if(array_key_exists("ObjectPosition", $content))
+				IPS_SetPosition($id, $content["ObjectPosition"]);
+			if(array_key_exists("ObjectIcon", $content))
+				IPS_SetIcon($id, $content["ObjectIcon"]);
+		}
+		else
+		{
+			if(@IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]) !== false)
+				$id = IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]);
+			else
+				$id = $config[$content["ObjectIdent"]]->value;
+		}
+		
+		$this->SetConfig($content["ObjectIdent"], array("value" => $id, "type" => "IPSObj"));
+		return $id;
+	}
+	
+	//Creates a Category With the in $content defined properties
+	protected function CreateCategory($content)
+	{
+		/**
+		 * 
+		 * 
+		 * @param <array> $content 
+		 * 
+		 * @return <integer> $CategoryID
+		 
+		$content = array("ObjectName" => "CategoryName",
+						 "ParentID" => ParentID,
+						 "ObjectIdent" => "Identity",
+						 "ObjectInfo" => "Info", //optional
+						 "ObjectIsHidden" => Boolean, //optional
+						 "ObjectPosition" => position, //optional
+						 "ObjectIcon" => "Icon" //optional
+						)
+		 */
+		 
+		$config = (array) $this->config;
+		$exists = IPS_ObjectExists($config[$content['ObjectIdent']]->value);
+		if(@IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]) === false && (!array_key_exists($content['ObjectIdent'], $config) || !$exists))
+		{
+			$id = IPS_CreateCategory();
+			IPS_SetName($id, $content['ObjectName']);
+			IPS_SetParent($id, $content['ParentID']);
+			IPS_SetIdent($id, $content['ObjectIdent']);
+			if(array_key_exists("ObjectInfo", $content))
+				IPS_SetInfo($id, $content["ObjectInfo"]);
+			if(array_key_exists("ObjectIsHidden", $content))
+				IPS_SetHidden($id, $content["ObjectIsHidden"]);
+			if(array_key_exists("ObjectPosition", $content))
+				IPS_SetPosition($id, $content["ObjectPosition"]);
+			if(array_key_exists("ObjectIcon", $content))
+				IPS_SetIcon($id, $content["ObjectIcon"]);
+		}
+		else
+		{
+			if(@IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]) !== false)
+				$id = IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]);
+			else
+				$id = $config[$content["ObjectIdent"]]->value;
+		}
+		
+		$this->SetConfig($content["ObjectIdent"], array("value" => $id, "type" => "IPSObj"));
+		return $id;
+	}
+	
+	//Creates a Variable With the in $content defined properties
+	protected function CreateVariable($content)
+	{
+		/**
+		 * 
+		 * 
+		 * @param <array> $content 
+		 * 
+		 * @return <integer> $VariableID
+		 
+		$content = array("ObjectName" => "VariableName",
+						 "ParentID" => ParentID,
+						 "ObjectIdent" => "Identity",
+						 "VariableType" => VariableType,
+						 "ObjectInfo" => "Info", //optional
+						 "ObjectIsHidden" => Boolean, //optional
+						 "ObjectPosition" => position, //optional
+						 "ObjectIcon" => "Icon", //optional
+						 "VariableCustomProfile" => "Profile", //optional
+						 "VariableCustomAction" => ActionID, //optional
+						 "VariableValue" => value //optional
+						)
+						//VariableTypes: 0: bool, 1: integer, 2: float, 3: string 
+		 */
+		 
+		$config = (array) $this->config;
+		$exists = IPS_ObjectExists($config[$content['ObjectIdent']]->value);
+		if(@IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]) === false && (!array_key_exists($content['ObjectIdent'], $config) || !$exists))
+		{
+			$id = IPS_CreateVariable($content['VariableType']);
+			IPS_SetName($id, $content['ObjectName']);
+			IPS_SetParent($id, $content['ParentID']);
+			IPS_SetIdent($id, $content['ObjectIdent']);
+			if(array_key_exists("ObjectInfo", $content))
+				IPS_SetInfo($id, $content["ObjectInfo"]);
+			if(array_key_exists("ObjectIsHidden", $content))
+				IPS_SetHidden($id, $content["ObjectIsHidden"]);
+			if(array_key_exists("ObjectPosition", $content))
+				IPS_SetPosition($id, $content["ObjectPosition"]);
+			if(array_key_exists("ObjectIcon", $content))
+				IPS_SetIcon($id, $content["ObjectIcon"]);
+			if(array_key_exists("VariableCustomProfile", $content))
+				IPS_SetVariableCustomProfile($id, $content["VariableCustomProfile"]);
+			if(array_key_exists("VariableCustomAction", $content))
+				IPS_SetVariableCustomAction($id, $content["VariableCustomAction"]);
+			if(array_key_exists("VariableValue", $content))
+				SetValue($id, $content["VariableValue"]);
+		}
+		else
+		{
+			if(@IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]) !== false)
+				$id = IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]);
+			else
+				$id = $config[$content["ObjectIdent"]]->value;
+		}
+		
+		$this->SetConfig($content["ObjectIdent"], array("value" => $id, "type" => "IPSObj"));
+		return $id;
+	}
+	
+	//Creates an Event With the in $content defined properties
+	protected function CreateEvent($content)
+	{
+		/**
+		 * 
+		 * 
+		 * @param <array> $content 
+		 * 
+		 * @return <integer> $EventID
+		 
+		$content = array("ObjectName" => "EventName",
+						 "ParentID" => ParentID,
+						 "ObjectIdent" => "Identity",
+						 "EventType" => EventType,
+						 "TriggerType" => TriggerType, //leave blank if EventType != 1
+						 "TriggerValue" => Value, //leave blank if type != 2, 3, or 4 or EventType != 1
+						 "TriggerVariableID" => TargetID, //leave blank if EventType != 1
+						 "CyclicTimeType" => TimeType, //leave blank if EventType != 0
+						 "CyclicTimeValue" => Interval, //leave blank if EventType != 0
+						 "EventScript" => "PHP Script"
+						)
+						//TriggerType: 0: refresh, 1: change, 2: transcend, 3: fall below, 4: exact value
+						//EventTypes: 0: Triggered, 1: cyclic 
+						//CyclicTimeType: 0: just once, 1: seconds, 2: minutes, 3: hours
+		 */
+		 
+		$config = (array) $this->config;
+		$exists = IPS_ObjectExists(@$config[$content['ObjectIdent']]->value);
+		if(@IPS_CategoryExists($content["TriggerVariableID"]) === true && array_key_exists("TriggerVariableID", $content))
+		{
+			if(IPS_HasChildren($content["TriggerVariableID"]))
+			{
+				$children = IPS_GetChildrenIDs($content["TriggerVariableID"]);
+				$CategoryName = str_replace(" ","",IPS_GetName($content["TriggerVariableID"]));
+				foreach($children as $child)
+				{
+					$newContent = $content;
+					$childName = str_replace(" ","",IPS_GetName($child));
+					$newContent["TriggerVariableID"] = $child;
+					$newContent["ObjectIdent"] = $content["ObjectIdent"] . "_" . $CategoryName . "_" . $childName;
+					if(IPS_CategoryExists($child))
+						$newContent["ObjectName"] = $content["ObjectName"] . "_" . $CategoryName;
+					else
+						$newContent["ObjectName"] = $content["ObjectName"] . "_" . $CategoryName . "_" . $childName;
+					$this->CreateEvent($newContent);
+				}
+			}
+		}
+		else if(@IPS_VariableExists($content["TriggerVariableID"]) || $content["EventType"] == 1)
+		{
+			if(@IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]) === false && (!array_key_exists($content['ObjectIdent'], $config) || !$exists))
+			{
+				$id = IPS_CreateEvent($content["EventType"]);
+				IPS_SetEventScript($id, $content["EventScript"]);
+				if($content["EventType"] == 0)
+				{
+					IPS_SetEventTrigger($id, $content["TriggerType"], $content["TriggerVariableID"]);
+					if($content["TriggerType"] == 2 || $content["TriggerType"] == 3 || $content["TriggerType"] == 4)
+						IPS_SetEventTriggerValue($id, $content["TriggerValue"]);
+				}
+				else if($content["EventType"] == 1)
+				{
+					if($content["CyclicTimeType"] != 0)
+					{
+						IPS_SetEventCyclic($id,
+								   0,0,0,0, /*No Datecheck*/
+								   $content["CyclicTimeType"],
+								   $content["CyclicTimeValue"]
+								  );
+					}
+					else
+					{
+						IPS_SetEventCyclic($id,
+								   0,0,0,0, /*No Datecheck*/
+								   $content["CyclicTimeType"],
+								   0
+								  );
+					}
+					
+				}
+					
+				IPS_SetName($id, $content["ObjectName"]);
+				IPS_SetParent($id, $content["ParentID"]);
+				IPS_SetIdent($id, $content["ObjectIdent"]);
+				IPS_SetEventActive($id, true);
+			}
+			else
+			{
+				if(@IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]) !== false)
+					$id = IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]);
+				else
+					$id = $config[$content["ObjectIdent"]]->value;
+			}
+			
+			$this->SetConfig($content["ObjectIdent"], array("value" => $id, "type" => "IPSObj"));
+			return $id;
+		}
+	}
+
+	////////////////////
+	//system functions// (DO NOT DELETE)
+	////////////////////
+	
+	//Changes the content of the config.json file (& the internal config variable)
+	protected function SetConfig($key = "AutoRefresh", $value = 0)
+	{
+		/**
+		 * 
+		 * 
+		 * @param <string> $key  
+		 * @param <Any Type> $value  
+		 * 
+		 * @return <value>
+		 */
+		 
+		if($key != "AutoRefresh")
+		{
+			if(gettype($value) == "array" || gettype($value) == "object")
+			{
+				$this->config = (array) $this->config;
+				$this->config["$key"] = $value;
+				file_put_contents($this->configFile, json_encode($this->config));
+			}
+			else
+			{
+				$this->config = (array) $this->config;
+				$this->config["$key"] = array("value" => $value, "type" => "none");
+				file_put_contents($this->configFile, json_encode($this->config));
+			}
+		}
+		else
+		{
+			$config = (array) $this->config;
+			foreach($config as $id => $val)
+			{
+				if($val->type != "none" && $val->type != "IPSObj")
+				{
+					if($val->value != $this->Read($id)) //avoid unnecessary computing 
+						$this->SetConfig($id, array("value" => $this->Read($id), "type" => $val->type));
+				}
+			}
+		}	
+	}
+	
+	//Registers an element/property into the system (the elements defined in the form.json file)
+	protected function Register($name, $value)
+	{
+		/**
+		 * 
+		 * 
+		 * @param <string> $name 
+		 * @param <value> $value 
+		 * 
+		 * @return <Status String>
+		 */
+		
+		switch(gettype($value))
+		{
+			case("boolean"):
+				if(@$this->RegisterPropertyBoolean($name) !== false)
+				{
+					$this->RegisterPropertyBoolean($name,$value);
+				}	
+				break;
+			case("string"):
+				if(@$this->RegisterPropertyString($name) !== false)
+				{
+					$this->RegisterPropertyString($name,$value);
+				}	
+				break;
+			case("integer"):
+				if(@$this->RegisterPropertyInteger($name) !== false)
+				{
+					$this->RegisterPropertyInteger($name,$value);
+				}	
+				break;
+			case("double"):
+				if(@$this->RegisterPropertyFloat($name) !== false)
+				{
+					$this->RegisterPropertyFloat($name,$value);
+				}	
+				break;
+			default:
+				return "Unsupported type: " . gettype($value);
+				break;
+		}
+		$this->SetConfig($name, array("type" => gettype($value),
+									  "value" => $value)
+									 );
+		return "Property Registered:\n". "Name: $name\n"."Value: $value\n" ."Type: ". gettype($value);
+	}
+	
+	//Reads the value of an element/property (the elements defined in the form.json file)
+	protected function Read($name) 
+	{
+		/**
+		 * 
+		 * 
+		 * @param <string> $name 
+		 * 
+		 * @return <value>
+		 */
+		$config = (array) $this->config;
+		switch($config["$name"]->type)
+		{
+			case("boolean"):
+				$value = $this->ReadPropertyBoolean($name);
+				break;
+			case("string"):
+				$value = $this->ReadPropertyString($name);
+				break;
+			case("integer"):
+				$value = $this->ReadPropertyInteger($name);
+				break;
+			case("double"):
+				$value = $this->ReadPropertyFloat($name);
+				break;
+			case("IPSObj"):
+				$value = $this->config->$name->value;
+				break;
+			case("none"):
+				$value = $this->config->$name->value;
+		}
+		return $value;
+	}
+	
+	/////////////////////////
+	//more system functions// (DO NOT DELETE)
+	///////////////////////// (for better utility)
+	
+	protected function SetValueByDevice($id, $value)
+	{
+		$type = IPS_GetInstance($id)['ModuleInfo']['ModuleType'];
+		if(strpos($type, "EIB"))
+		{
+			if(@EIB_GetGroupFunction($id) !== false)
+			{
+				switch(EIB_GetGroupFunction($id))
+				{
+					case("Switch"):
+						EIB_Switch($id, $value);
+						break;
+					case("DimControl"):
+						EIB_DimControl($id, $value);
+						break;
+					case("DimValue"):
+						EIB_DimValue($id, $value);
+						break;
+					case("Value"):
+						EIB_Value($id, $value);
+						break;
+					case("Scale"):
+						EIB_Scale($id, $value);
+						break;
+					case("DriveMove"):
+						EIB_DriveMove($id, $value);
+						break;
+					case("DriveStep"):
+						EIB_DriveStep($id, $value);
+						break;
+					case("DriveShutterValue"):
+						EIB_DriveShutterValue($id, $value);
+						break;
+					case("DriveBladeValue"):
+						EIB_DriveBladeValue($id, $value);
+						break;
+					case("PriorityPosition"):
+						EIB_PriorityPosition($id, $value);
+						break;
+					case("PriorityControl"):
+						EIB_PriorityControl($id, $value);
+						break;
+					case("FloatValue"):
+						EIB_FloatValue($id, $value);
+						break;
+				}
+			}
+		}
+	}
+	
+	protected function Set($linkID, $value)
+	{
+		if(IPS_CategoryExists($linkID))
+		{
+			foreach($linkID as $child)
+			{
+				if(IPS_LinkExists($child))
+					$this->Set($child, $value);
+			}
+		}
+		else if(IPS_LinkExists($linkID)) //only allow links
+		{
+			$target = IPS_GetLink($linkID)['TargetID'];
+			if(IPS_InstanceExists($target))
+			{
+				$insID = $target;
+				$target = @IPS_GetChildrenIDs($target)[0];
+			}
+			if (IPS_VariableExists($target))
+			{
+				$o = IPS_GetObject($target);
+				$v = IPS_GetVariable($target);
+				$currentValue = GetValue($target);
+				if(gettype($value) == "boolean" || $currentValue != $value)
+				{	
+					$switchValue = true;
+				}
+				else
+				{
+					$switchValue = false;
+				}
+				
+				if($switchValue)
+				{
+					if($v['VariableCustomAction'] > 0)
+						$actionID = $v['VariableCustomAction'];
+					else
+						$actionID = $v['VariableAction'];
+					
+					//try changing the value by device-specific commands
+					if($actionID < 10000)
+					{
+						if(@$insID != NULL)
+							$this->SetValueByDevice($insID, $value);
+						else
+							SetValue($target, $value);
+						//Skip this device if we do not have a proper id
+						continue;
+					}
+						
+					if(IPS_InstanceExists($actionID)) {
+						IPS_RequestAction($actionID, $o['ObjectIdent'], $value);
+					} else if(IPS_ScriptExists($actionID)) {
+						echo IPS_RunScriptWaitEx($actionID, Array("VARIABLE" => $id, "VALUE" => $value, "SENDER" => "WebFront"));
+					}	
+				}
+			}
+			else
+			{
+				SetValueByDevice($insID, $value);
+			}
+		}
+		else
+		{
+			throw new Exception('Only Links as Targets allowed');
+		}
+	}
+	
+	protected function Del($id, $bool = false /*Delete associated files along with the objects ?*/)
+	{
+		if(IPS_HasChildren($id))
+		{
+			$childIDs = IPS_GetChildrenIDs($id);
+			foreach($childIDs as $child)
+			{
+				$this->Del($child);
+			}
+			$this->Del($id);
+		}
+		else
+		{
+			$type = IPS_GetObject($id)['ObjectType'];
+			switch($type)
+			{
+				case(0):
+					IPS_DeleteCategory($id);
+					break;
+				case(1):
+					IPS_DeleteInstance($id);
+					break;
+				case(2):
+					IPS_DeleteVariable($id);
+					break;
+				case(3):
+					IPS_DeleteScript($id);
+					break;
+				case(4):
+					IPS_DeleteEvent($id);
+					break;
+				case(5):
+					IPS_DeleteMedia($id, $bool /*dont delete media file along with it*/);
+					break;
+				case(6):
+					IPS_DeleteLink($id);
 			}
 		}
 	}
