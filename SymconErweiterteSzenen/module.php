@@ -333,7 +333,10 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		
 		$actualIdent = str_replace("Sensor", "", $SceneIdent);
 		$actualIdent = str_replace("Scene", "", $actualIdent);
-		$actualIdent++;
+		if(strpos($SceneIdent, "Sensor") !== false)
+		{
+			$actualIdent++;
+		}
 		$actualIdent = "Scene". $actualIdent;
 		$data = wddx_deserialize(GetValue(IPS_GetObjectIDByIdent($actualIdent."Data", $this->InstanceID)));
 		if($data != NULL) {
