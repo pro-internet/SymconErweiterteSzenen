@@ -2,7 +2,7 @@
 class ErweiterteSzenenSteuerung extends IPSModule {
 
 	/////////////
-	// Modular  //
+	// Modular //
 	/////////////
 
 	public function Create() {
@@ -83,11 +83,27 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 					//Scene
 					$vid = IPS_CreateVariable(1 /* Scene */);
 					SetValue($vid, 2);
+					$scenesDeleted = false;
 				} else
 				{
 					$vid = IPS_GetObjectIDByIdent("Scene".$i, $this->InstanceID);
+					$scenesDeleted = true;
 				}
 				IPS_SetParent($vid, $this->InstanceID);
+				if(IPS_GetName($vid) != $data[$i - 1]['name'] && strpos(IPS_GetName($vid),"Unnamed") === false)
+				{	//Namechange detected
+					if($this->IPS_GetObjectIDByName($data[$i - 1]['name'], $this->InstanceID) !== false)
+					{ //not a new scene
+						if($scenesDeleted) {
+							$oldSceneID = $this->IPS_GetObjectIDByName($data[$i - 1]['name'], $this->InstanceID);
+							$oldSceneIdent = IPS_GetObject($oldSceneID)['ObjectIdent'];
+							$oldSceneDataID = IPS_GetObjectIDByIdent($oldSceneIdent . "Data", $this->InstanceID);
+							$newSceneDataID = IPS_GetObjectIDByIdent("Scene".$i."Data", $this->InstanceID);
+							$oldSceneData = GetValue($oldSceneDataID);
+							SetValue($newSceneDataID, $oldSceneData);
+						}
+					}
+				}
 				IPS_SetName($vid, $data[$i - 1]['name']);
 				IPS_SetIdent($vid, "Scene".$i);
 				IPS_SetPosition($vid, $i);
@@ -101,7 +117,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				}
 				else
 				{
-					$vid = @IPS_GetObjectIDByIdent("Scene".$i."Data", $this->InstanceID);
+					$vid = IPS_GetObjectIDByIdent("Scene".$i."Data", $this->InstanceID);
 				}
 				IPS_SetParent($vid, $this->InstanceID);
 				IPS_SetName($vid, $data[$i - 1]['name']."Data");
@@ -112,6 +128,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				//Set Selector profile
 				IPS_SetVariableProfileAssociation("ESZS.Selector" . $this->InstanceID, ($i-1), $data[$i - 1]['name'],"",-1);
 			}
+
 			//Selector Variable
 			if(@IPS_GetObjectIDByIdent("Selector", IPS_GetParent($this->InstanceID)) === false)
 			{
@@ -181,6 +198,19 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			IPS_SetVariableCustomAction($vid, $svs);
 			IPS_SetVariableCustomProfile($vid, "~Switch");
 			
+			//Create Event for Automatik
+			if(@IPS_GetObjectIDByIdent("AutomatikEvent", $eventsCat) === false)
+				$eid = IPS_CreateEvent(0);
+			else
+				$eid = IPS_GetObjectIDByIdent("AutomatikEvent", $eventsCat);
+			IPS_SetEventTrigger($eid, 4, $vid);
+			IPS_SetEventTriggerValue($eid, true);
+			IPS_SetEventScript($eid, "ESZS_CallScene(". $this->InstanceID .", $sensorID);");
+			IPS_SetEventActive($eid, true);
+			IPS_SetParent($eid, $eventsCat);
+			IPS_SetName($eid, "Automatik.OnTrue");
+			IPS_SetIdent($eid, "AutomatikEvent");
+			
 			//Create Sensor Selection
 			//by its profile
 			// $sensorID = this->ReadPropertyInteger("Sensor");
@@ -211,7 +241,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				IPS_SetPosition($insID, -500);
 				IPS_SetIdent($insID, "Set");
 				
-				$sets = array("Früh","Morgen","Tag","Dämmerung","Abend");
+				$sets = array("Früh","Morgen","Tag","Dämmerung","Abend","Nacht");
 				//Create the profile
 				if(IPS_VariableProfileExists("ESZS.Sets" . $this->InstanceID))
 				{
@@ -230,19 +260,27 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				foreach($sets as $i => $state)
 				{
 					if(@IPS_GetObjectIDByIdent("set$i", $insID) === false)
-					{
 						$vid = IPS_CreateVariable(1);
-					}
 					else
-					{
 						$vid = IPS_GetObjectIDByIdent("set$i", $insID);
-					}
 					IPS_SetName($vid, $state);
 					IPS_SetParent($vid, $insID);
 					IPS_SetPosition($vid, $i);
 					IPS_SetIdent($vid, "set$i");
 					IPS_SetVariableCustomAction($vid, $svs);
 					IPS_SetVariableCustomProfile($vid, "ESZS.Selector" . $this->InstanceID);
+					
+					//Create Events for the States
+					if(@IPS_GetObjectIDByIdent("SetEvent$i", $eventsCat) === false)
+						$eid = IPS_CreateEvent(0);
+					else
+						$eid = IPS_GetObjectIDByIdent("SetEvent$i", $eventsCat);
+					IPS_SetEventTrigger($eid, 1, $vid);
+					IPS_SetEventScript($eid, "ESZS_CallScene(" . $this->InstanceID . ", $sensorID);");
+					IPS_SetName($eid, "$state".".OnChange");
+					IPS_SetParent($eid, $eventsCat);
+					IPS_SetIdent($eid, "SetEvent$i");
+					IPS_SetEventActive($eid, true);
 				}
 			}
 			
@@ -333,10 +371,8 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		
 		$actualIdent = str_replace("Sensor", "", $SceneIdent);
 		$actualIdent = str_replace("Scene", "", $actualIdent);
-		if(strpos($SceneIdent, "Sensor") !== false)
-		{
+		if(strpos($SceneIdent, "Sensor") !== false) //sender = sensor
 			$actualIdent++;
-		}
 		$actualIdent = "Scene". $actualIdent;
 		$data = wddx_deserialize(GetValue(IPS_GetObjectIDByIdent($actualIdent."Data", $this->InstanceID)));
 		if($data != NULL) {
@@ -496,6 +532,7 @@ SetValue(\$_IPS['VARIABLE'], \$_IPS['VALUE']);
 			if($childName == $name)
 				return $child;
 		}
+		return false;
 	}
 	
 	private function RemoveExcessiveProfiles($profileName)
