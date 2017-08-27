@@ -97,7 +97,24 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				$eventsCat = IPS_GetObjectIDByIdent("EventsCat", $this->InstanceID);
 			}
 			
-			$data = $this->sortByKey($data, "Position");
+			$noPos = true;
+			foreach($data as $d)
+			{
+				if($d['Position'] !== 0)
+				{
+					$noPos = false;
+				}
+			}
+			if($noPos === false)
+				$data = $this->sortByKey($data, "Position");
+			else
+			{
+				for($k = 1; $k <= sizeof($data), $k++)
+				{
+					$data[$k]['Position'] = $k;
+				}
+			}
+			
 			
 			$standBy = false;
 			for($i = 0; $i < sizeof($data); $i++)
@@ -666,6 +683,7 @@ SetValue(\$_IPS['VARIABLE'], \$_IPS['VALUE']);
 		foreach ($arr as $key => $row)
 		{
 			$d[$key] = $row[$k];
+			
 		}
 		array_multisort($arr, SORT_ASC, $d);
 		return $arr;
