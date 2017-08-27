@@ -104,9 +104,9 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			{
 				$data = json_decode($this->ReadPropertyString("Names"),true);
 				$data = $this->sortByKey($data, "Position");
-				$ID = $data[$i]['ID'];
+				$ID = @$data[$i]['ID'];
 				//Set Configuration for new Scenes
-				if($ID == 0)
+				if($ID == 0 || $ID == null)
 				{
 					$configModule = json_decode(IPS_GetConfiguration($this->InstanceID), true);
 					$ID = rand(10000, 99999);
@@ -351,6 +351,19 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 						}
 						if($entryExists == false)
 						{
+							//copy values of older version of the module to the new one
+							$excessiveID = str_replace("Scene", "", $ident);
+							$excessiveID = str_replace("Data", "", $excessiveID);
+							if($excessiveID < 9999)
+							{
+								foreach(IPS_GetChildrenIDs($this->InstanceID) as $c)
+								{
+									if(IPS_GetName($c) == IPS_GetName($child) && $c != $child)
+									{
+										SetValue($c, GetValue($child));
+									}
+								}
+							}
 							IPS_DeleteVariable($child);
 						}
 					}
