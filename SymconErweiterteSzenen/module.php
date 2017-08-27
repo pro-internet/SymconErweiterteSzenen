@@ -183,17 +183,20 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				foreach(IPS_GetChildrenIDs($setIns) as $l => $child)
 				{
 					$o = IPS_GetObject($child);
-					foreach($setSavedValues as $stateSavedValues)
+					if(isset($setSavedValues))
 					{
-						if($stateSavedValues['obj']['ObjectIdent'] == $o['ObjectIdent'])
+						foreach($setSavedValues as $stateSavedValues)
 						{
-							$savedName = @$stateSavedValues['profile']['Associations'][$stateSavedValues['var']['Value']]['Name'];
-							$currentName = @IPS_GetVariableProfile("ESZS.Selector" . $this->InstanceID)['Associations'][GetValue($child)]['Name'];
-							if($savedName != $currentName)
+							if($stateSavedValues['obj']['ObjectIdent'] == $o['ObjectIdent'])
 							{
-								$assoc = $this->GetAssociationByName("ESZS.Selector" . $this->InstanceID, $savedName);
-								if($assoc !== false)
-									SetValue($child, $assoc);
+								$savedName = @$stateSavedValues['profile']['Associations'][$stateSavedValues['var']['Value']]['Name'];
+								$currentName = @IPS_GetVariableProfile("ESZS.Selector" . $this->InstanceID)['Associations'][GetValue($child)]['Name'];
+								if($savedName != $currentName)
+								{
+									$assoc = $this->GetAssociationByName("ESZS.Selector" . $this->InstanceID, $savedName);
+									if($assoc !== false)
+										SetValue($child, $assoc);
+								}
 							}
 						}
 					}
