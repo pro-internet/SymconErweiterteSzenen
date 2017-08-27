@@ -16,7 +16,7 @@
 		  "edit": {
 		  	  "type": "ValidationTextBox"
 		  }
-		}, {
+		}, { 
 		 "label": "Position",
 		 "name": "Position",
 		 "width": "50px",
