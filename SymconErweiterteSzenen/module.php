@@ -108,6 +108,8 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			if($noPos === false)
 				$data = $this->sortByKey($data, "Position");		
 			
+			var_dump($noPos);
+			
 			$standBy = false;
 			for($i = 0; $i < sizeof($data); $i++)
 			{
