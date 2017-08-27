@@ -107,8 +107,18 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			}
 			if($noPos === false)
 				$data = $this->sortByKey($data, "Position");		
-			
-			var_dump($noPos);
+			else
+			{
+				foreach($data as $l => $d)
+				{
+					$data[$l]['Position'] = $l;
+				}
+				$configModule['Names'] = json_encode($data);
+				$configJSON = json_encode($configModule);
+				IPS_SetConfiguration($this->InstanceID, $configJSON);
+				IPS_ApplyChanges($this->InstanceID);
+				$standBy = true;
+			}
 			
 			$standBy = false;
 			for($i = 0; $i < sizeof($data); $i++)
