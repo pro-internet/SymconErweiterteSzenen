@@ -109,7 +109,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				$data = $this->sortByKey($data, "Position");
 			else
 			{
-				for($k = 1; $k <= sizeof($data), $k++)
+				for($k = 1; $k <= sizeof($data); $k++)
 				{
 					$data[$k]['Position'] = $k;
 				}
