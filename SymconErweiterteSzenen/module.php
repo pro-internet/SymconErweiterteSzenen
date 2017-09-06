@@ -90,11 +90,14 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 						IPS_SetIdent($child, "Scene$ID");
 						$dataID = IPS_GetObjectIDByIdent("Scene$sceneNum" . "Data", $this->InstanceID);
 						IPS_SetIdent($dataID, "Scene$ID" . "Data");
-						IPS_SetConfiguration($this->InstanceID, $configJSON);
-						IPS_ApplyChanges($this->InstanceID);
-						break;
+						IPS_LogMessage("SzenenZeitDaySet", IPS_GetName($child) . ": $ID + $child";
 					}
 				}
+			}
+			if($update)
+			{
+				IPS_SetConfiguration($this->InstanceID, $configJSON);
+				IPS_ApplyChanges($this->InstanceID);
 			}
 			
 			//Selector profile
