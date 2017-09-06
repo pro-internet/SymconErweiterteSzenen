@@ -70,6 +70,33 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				}
 			}
 			
+			//basically check if it's an update and keep the current scenes alive
+			$update = false;
+			foreach(IPS_GetChildrenIDs($this->InstanceID) as $child)
+			{
+				$ident = IPS_GetObject($child)['ObjectIdent'];
+				if(strpos($ident, "Scene") && strpos($ident, "Data") !== true)
+				{
+					$sceneNum = str_replace("Scene", "", $ident);
+					if($sceneNum < 9999)
+					{
+						$update = true;
+						$configModule = json_decode(IPS_GetConfiguration($this->InstanceID), true);
+						$ID = rand(10000, 99999);
+						$data[$sceneNum - 1]['ID'] = $ID;
+						$configModule['Names'] = json_encode($data);
+						$configJSON = json_encode($configModule);
+						//change the properties of the scene to the new ones
+						IPS_SetIdent($child, "Scene$ID");
+						$dataID = IPS_GetObjectIDByIdent("Scene$sceneNum" . "Data", $this->InstanceID);
+						IPS_SetIdent($dataID, "Scene$ID" . "Data");
+						IPS_SetConfiguration($this->InstanceID, $configJSON);
+						IPS_ApplyChanges($this->InstanceID);
+						break;
+					}
+				}
+			}
+			
 			//Selector profile
 			if(IPS_VariableProfileExists("ESZS.Selector" . $this->InstanceID))
 			{
