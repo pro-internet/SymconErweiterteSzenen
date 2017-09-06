@@ -148,7 +148,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			}
 			
 			$standBy = false;
-			if($update == false)
+			if($update === false)
 			{
 				for($i = 0; $i < sizeof($data); $i++)
 				{
@@ -389,7 +389,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			}
 
 			//Delete excessive Scences
-			if($standBy === false)
+			if($standBy === false && $update === false)
 			{
 				$ChildrenIDs = IPS_GetChildrenIDs($this->InstanceID);
 				foreach($ChildrenIDs as $child)
