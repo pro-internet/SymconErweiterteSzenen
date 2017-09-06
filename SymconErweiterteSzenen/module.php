@@ -148,59 +148,62 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			}
 			
 			$standBy = false;
-			for($i = 0; $i < sizeof($data); $i++)
+			if($update == false)
 			{
-				$data = json_decode($this->ReadPropertyString("Names"),true);
-				$data = $this->sortByKey($data, "Position");
-				if($noPos)
-					$data[$i]['Position'] = $i;
-				$ID = @$data[$i]['ID'];
-				//Set Configuration for new Scenes
-				if($ID == 0 || $ID == null)
+				for($i = 0; $i < sizeof($data); $i++)
 				{
-					$configModule = json_decode(IPS_GetConfiguration($this->InstanceID), true);
-					$ID = rand(10000, 99999);
-					$data[$i]['ID'] = $ID;
-					$configModule['Names'] = json_encode($data);
-					$configJSON = json_encode($configModule);
-					IPS_SetConfiguration($this->InstanceID, $configJSON);
-					IPS_ApplyChanges($this->InstanceID);
-					$standBy = true;
-					break;
-				}
-				
-				if(@IPS_GetObjectIDByIdent("Scene".$ID, $this->InstanceID) === false){
-					//Scene
-					$vid = IPS_CreateVariable(1 /* Scene */);
-					SetValue($vid, 2);
-				} else
-				{
-					$vid = IPS_GetObjectIDByIdent("Scene".$ID, $this->InstanceID);
-				}
-				IPS_SetParent($vid, $this->InstanceID);
-				IPS_SetName($vid, $data[$i]['name']);
-				IPS_SetIdent($vid, "Scene".$ID);
-				IPS_SetPosition($vid, $data[$i]['Position']);
-				IPS_SetVariableCustomProfile($vid, "SZS.SceneControl");
-				$this->EnableAction("Scene".$ID);
+					$data = json_decode($this->ReadPropertyString("Names"),true);
+					$data = $this->sortByKey($data, "Position");
+					if($noPos)
+						$data[$i]['Position'] = $i;
+					$ID = @$data[$i]['ID'];
+					//Set Configuration for new Scenes
+					if($ID == 0 || $ID == null)
+					{
+						$configModule = json_decode(IPS_GetConfiguration($this->InstanceID), true);
+						$ID = rand(10000, 99999);
+						$data[$i]['ID'] = $ID;
+						$configModule['Names'] = json_encode($data);
+						$configJSON = json_encode($configModule);
+						IPS_SetConfiguration($this->InstanceID, $configJSON);
+						IPS_ApplyChanges($this->InstanceID);
+						$standBy = true;
+						break;
+					}
+					
+					if(@IPS_GetObjectIDByIdent("Scene".$ID, $this->InstanceID) === false){
+						//Scene
+						$vid = IPS_CreateVariable(1 /* Scene */);
+						SetValue($vid, 2);
+					} else
+					{
+						$vid = IPS_GetObjectIDByIdent("Scene".$ID, $this->InstanceID);
+					}
+					IPS_SetParent($vid, $this->InstanceID);
+					IPS_SetName($vid, $data[$i]['name']);
+					IPS_SetIdent($vid, "Scene".$ID);
+					IPS_SetPosition($vid, $data[$i]['Position']);
+					IPS_SetVariableCustomProfile($vid, "SZS.SceneControl");
+					$this->EnableAction("Scene".$ID);
 
-				if(@IPS_GetObjectIDByIdent("Scene".$ID."Data", $this->InstanceID) === false)
-				{
-					//SceneData
-					$vid = IPS_CreateVariable(3 /* SceneData */);
-				}
-				else
-				{
-					$vid = IPS_GetObjectIDByIdent("Scene".$ID."Data", $this->InstanceID);
-				}
-				IPS_SetParent($vid, $this->InstanceID);
-				IPS_SetName($vid, $data[$i]['name']."Data");
-				IPS_SetIdent($vid, "Scene".$ID."Data");
-				IPS_SetPosition($vid, $data[$i]['Position'] + $this->maxByKey($data, 'Position') + 1);
-				IPS_SetHidden($vid, true);
+					if(@IPS_GetObjectIDByIdent("Scene".$ID."Data", $this->InstanceID) === false)
+					{
+						//SceneData
+						$vid = IPS_CreateVariable(3 /* SceneData */);
+					}
+					else
+					{
+						$vid = IPS_GetObjectIDByIdent("Scene".$ID."Data", $this->InstanceID);
+					}
+					IPS_SetParent($vid, $this->InstanceID);
+					IPS_SetName($vid, $data[$i]['name']."Data");
+					IPS_SetIdent($vid, "Scene".$ID."Data");
+					IPS_SetPosition($vid, $data[$i]['Position'] + $this->maxByKey($data, 'Position') + 1);
+					IPS_SetHidden($vid, true);
 
-				//Set Selector profile
-				IPS_SetVariableProfileAssociation("ESZS.Selector" . $this->InstanceID, ($i), $data[$i]['name'],"",-1);
+					//Set Selector profile
+					IPS_SetVariableProfileAssociation("ESZS.Selector" . $this->InstanceID, ($i), $data[$i]['name'],"",-1);
+				}
 			}
 
 			//fix newly added scenes breaking "Sets" presets
