@@ -75,7 +75,9 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			foreach(IPS_GetChildrenIDs($this->InstanceID) as $child)
 			{
 				$ident = IPS_GetObject($child)['ObjectIdent'];
-				if(strpos($ident, "Scene") && strpos($ident, "Data") !== true)
+				//debug
+				IPS_LogMessage("SzenenZeitDaySet", IPS_GetName($child) . ": $ID + $child + $ident");
+				if(strpos($ident, "Scene") == true && strpos($ident, "Data") !== true)
 				{
 					$sceneNum = str_replace("Scene", "", $ident);
 					if($sceneNum < 9999)
@@ -90,7 +92,6 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 						IPS_SetIdent($child, "Scene$ID");
 						$dataID = IPS_GetObjectIDByIdent("Scene$sceneNum" . "Data", $this->InstanceID);
 						IPS_SetIdent($dataID, "Scene$ID" . "Data");
-						IPS_LogMessage("SzenenZeitDaySet", IPS_GetName($child) . ": $ID + $child");
 					}
 				}
 			}
