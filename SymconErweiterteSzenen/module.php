@@ -75,7 +75,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			foreach(IPS_GetChildrenIDs($this->InstanceID) as $child)
 			{
 				$ident = IPS_GetObject($child)['ObjectIdent'];
-				if(strpos($ident, "Scene") == true && strpos($ident, "Data") !== true)
+				if(strpos($ident, "Scene") !== false && strpos($ident, "Data") !== true)
 				{
 					$sceneNum = str_replace("Scene", "", $ident);
 					if($sceneNum < 9999)
