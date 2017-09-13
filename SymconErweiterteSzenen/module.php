@@ -70,6 +70,28 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				}
 			}
 			
+			//check if the scenes were already created with IDs but it was patched down
+			if($data[0]['ID'] == null || $data[0]['ID'] == 0)
+			{
+				foreach(IPS_GetChildrenIDs($this->InstanceID) as $i => $child)
+				{
+					$ident = IPS_GetObject($child)['ObjectIdent'];
+					if(strpos($ident, "Scene") !== false && strpos($ident, "Data") !== true)
+					{
+						$ID = str_replace("Scene", "", $ident);
+						if($ID > 9999)
+						{
+							$configModule = json_decode(IPS_GetConfiguration($this->InstanceID), true);
+							$data[$i]['ID'] = $ID;
+							$configModule['Names'] = json_encode($data);
+							$configJSON = json_encode($configModule);
+							IPS_SetConfiguration($this->InstanceID, $configJSON);
+							IPS_ApplyChanges($this->InstanceID);
+						}
+					}
+				}
+			}
+
 			//basically check if it's an update and keep the current scenes alive
 			$update = false;
 			foreach(IPS_GetChildrenIDs($this->InstanceID) as $child)
