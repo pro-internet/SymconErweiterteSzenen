@@ -800,7 +800,7 @@ SetValue(\$_IPS['VARIABLE'], \$_IPS['VALUE']);
 						 "ObjectIcon" => "Icon" //optional
 						)
 		 */
-		if(@IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["parentID"]) === false && (!array_key_exists($content['ObjectIdent'], $config) || !$exists))
+		if(@IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["parentID"]) === false)
 		{
 			$id = IPS_CreateLink();
 			IPS_SetName($id, $content['ObjectName']);
