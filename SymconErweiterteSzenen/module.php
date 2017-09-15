@@ -49,7 +49,36 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 		$this->RemoveExcessiveProfiles("ESZS.Selector");
 		$this->RemoveExcessiveProfiles("ESZS.Sets");
-		$this->CreateCategoryByIdent($this->InstanceID, "Targets", "Targets");
+		
+        //Create Targets Dummy Instance
+		if(@IPS_GetObjectIDByIdent("Targets", IPS_GetParent($this->InstanceID)) === false)
+		{
+			$DummyGUID = $this->GetModuleIDByName();
+			$insID = IPS_CreateInstance($DummyGUID);
+		}
+		else
+		{
+			$insID = IPS_GetObjectIDByIdent("Targets", IPS_GetParent($this->InstanceID));
+		}
+		IPS_SetName($insID, "Targets");
+		IPS_SetParent($insID, IPS_GetParent($this->InstanceID));
+		IPS_SetPosition($insID, 9999);
+		IPS_SetIdent($insID, "Targets");
+
+		//See if theres an old Targets Folder
+		if(@IPS_GetObjectIDByIdent("Targets", $this->InstanceID) !== false)
+		{
+            $targetsID = IPS_GetObjectIDByIdent("Targets", $this->InstanceID);
+			foreach(IPS_GetChildrenIDs($targetsID) as $targetLinkID)
+            {
+                $content = IPS_GetObject($targetLinkID);
+                $content["ParentID"] = $insID;
+                $this->CreateLink($content);
+            }
+            IPS_DeleteCategory($targetsID);
+		}
+		
+		//$this->CreateCategoryByIdent($this->InstanceID, "Targets", "Targets");
 		$data = json_decode($this->ReadPropertyString("Names"),true);
 
 		if($data != "")
@@ -750,6 +779,56 @@ SetValue(\$_IPS['VARIABLE'], \$_IPS['VALUE']);
 		}
 		array_multisort($arr, SORT_ASC, $d);
 		return $arr;
+	}
+
+    protected function CreateLink($content)
+	{
+		/**
+		 * 
+		 * 
+		 * @param <array> $content 
+		 * 
+		 * @return <integer> $LinkID
+		 
+		$content = array("ObjectName" => "LinkName",
+						 "ParentID" => ParentID,
+						 "ObjectIdent" => "Identity",
+						 "TargetID" => TargetID,
+						 "ObjectInfo" => "Info", //optional
+						 "ObjectIsHidden" => Boolean, //optional
+						 "ObjectPosition" => position, //optional
+						 "ObjectIcon" => "Icon" //optional
+						)
+		 */
+		
+		$config = (array) $this->config;
+		$exists = IPS_ObjectExists($config[$content['ObjectIdent']]->value);
+		if(@IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["parentID"]) === false && (!array_key_exists($content['ObjectIdent'], $config) || !$exists))
+		{
+			$id = IPS_CreateLink();
+			IPS_SetName($id, $content['ObjectName']);
+			IPS_SetParent($id, $content['ParentID']);
+			IPS_SetIdent($id, $content['ObjectIdent']);
+			if(array_key_exists("ObjectInfo", $content))
+				IPS_SetInfo($id, $content["ObjectInfo"]);
+			if(array_key_exists("ObjectIsHidden", $content))
+				IPS_SetHidden($id, $content["ObjectIsHidden"]);
+			if(array_key_exists("ObjectPosition", $content))
+				IPS_SetPosition($id, $content["ObjectPosition"]);
+			if(array_key_exists("ObjectIcon", $content))
+				IPS_SetIcon($id, $content["ObjectIcon"]);
+			IPS_SetLinkTargetID($id, $content["TargetID"]);
+		}
+		else
+		{
+			if(@IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]) !== false)
+				$id = IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]);
+			else
+				$id = $config[$content["ObjectIdent"]]->value;
+		}
+		
+		$this->SetConfig($content["ObjectIdent"], array("value" => $id, "type" => "IPSObj"));
+		return $id;
 	}
 }
 ?>
