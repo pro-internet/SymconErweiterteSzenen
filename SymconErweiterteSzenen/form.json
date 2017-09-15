@@ -25,6 +25,14 @@
 		 "edit": {
 		  	  "type": "ValidationTextBox"
 		  }
+		},
+		{
+		 "label": "ID",
+		 "name": "ID",
+		 "width": "50px",
+		 "add": 0,
+		 "visible": true,
+		 "save": true
 		}
 	  ]
 	},
