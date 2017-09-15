@@ -800,9 +800,6 @@ SetValue(\$_IPS['VARIABLE'], \$_IPS['VALUE']);
 						 "ObjectIcon" => "Icon" //optional
 						)
 		 */
-		
-		$config = (array) $this->config;
-		$exists = IPS_ObjectExists($config[$content['ObjectIdent']]->value);
 		if(@IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["parentID"]) === false && (!array_key_exists($content['ObjectIdent'], $config) || !$exists))
 		{
 			$id = IPS_CreateLink();
@@ -821,13 +818,8 @@ SetValue(\$_IPS['VARIABLE'], \$_IPS['VALUE']);
 		}
 		else
 		{
-			if(@IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]) !== false)
-				$id = IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]);
-			else
-				$id = $config[$content["ObjectIdent"]]->value;
+			$id = IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]);
 		}
-		
-		$this->SetConfig($content["ObjectIdent"], array("value" => $id, "type" => "IPSObj"));
 		return $id;
 	}
 }
