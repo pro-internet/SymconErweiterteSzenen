@@ -543,7 +543,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 	private function SaveValues($SceneIdent) {
 
-		$targetIDs = IPS_GetObjectIDByIdent("Targets", $this->InstanceID);
+		$targetIDs = IPS_GetObjectIDByIdent("Targets", IPS_GetParent($this->InstanceID));
 		$data = Array();
 
 		//We want to save all Lamp Values
