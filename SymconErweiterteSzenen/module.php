@@ -75,7 +75,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
                 $content["ParentID"] = $insID;
                 $this->CreateLink($content);
             }
-            IPS_DeleteCategory($targetsID);
+            $this->Del($targetsID);
 		}
 		
 		//$this->CreateCategoryByIdent($this->InstanceID, "Targets", "Targets");
@@ -821,6 +821,46 @@ SetValue(\$_IPS['VARIABLE'], \$_IPS['VALUE']);
 			$id = IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]);
 		}
 		return $id;
+	}
+
+    protected function Del($id, $bool = false /*Delete associated files along with the objects ?*/)
+	{
+		if(IPS_HasChildren($id))
+		{
+			$childIDs = IPS_GetChildrenIDs($id);
+			foreach($childIDs as $child)
+			{
+				$this->Del($child);
+			}
+			$this->Del($id);
+		}
+		else
+		{
+			$type = IPS_GetObject($id)['ObjectType'];
+			switch($type)
+			{
+				case(0):
+					IPS_DeleteCategory($id);
+					break;
+				case(1):
+					IPS_DeleteInstance($id);
+					break;
+				case(2):
+					IPS_DeleteVariable($id);
+					break;
+				case(3):
+					IPS_DeleteScript($id);
+					break;
+				case(4):
+					IPS_DeleteEvent($id);
+					break;
+				case(5):
+					IPS_DeleteMedia($id, $bool /*dont delete media file along with it*/);
+					break;
+				case(6):
+					IPS_DeleteLink($id);
+			}
+		}
 	}
 }
 ?>
