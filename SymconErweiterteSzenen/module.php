@@ -75,7 +75,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
                 $content["ParentID"] = $insID;
                 $this->CreateLink($content);
             }
-            $this->Del($targetsID);
+            //$this->Del($targetsID);
 		}
 		
 		//$this->CreateCategoryByIdent($this->InstanceID, "Targets", "Targets");
