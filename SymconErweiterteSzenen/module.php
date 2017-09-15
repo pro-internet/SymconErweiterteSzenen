@@ -426,18 +426,8 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				$sets = array("Früh","Morgen","Tag","Dämmerung","Abend","Nacht");
 				//Create the profile
 				if(IPS_VariableProfileExists("ESZS.Sets" . $this->InstanceID))
-				{
 					IPS_DeleteVariableProfile("ESZS.Sets" . $this->InstanceID);
-					IPS_CreateVariableProfile("ESZS.Sets" . $this->InstanceID, 1);
-				}
-				else
-				{
-					IPS_CreateVariableProfile("ESZS.Sets" . $this->InstanceID, 1);
-				}
-				foreach($sets as $i => $state)
-				{
-					IPS_SetVariableProfileAssociation("ESZS.Sets" . $this->InstanceID, $i, $state, "", -1);
-				}
+
 				//Create the variables
 				foreach($sets as $i => $state)
 				{
