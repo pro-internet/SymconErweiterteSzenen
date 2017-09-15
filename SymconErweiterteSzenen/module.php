@@ -517,7 +517,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				if(@IPS_GetObjectIDByIdent("Set", IPS_GetParent($this->InstanceID)) !== false)
 				{
 					$setIns = IPS_GetObjectIDByIdent("Set", IPS_GetParent($this->InstanceID));
-					IPS_DeleteVariable($setIns);
+					$this->Del($setIns);
 				}
 			}
 		}
