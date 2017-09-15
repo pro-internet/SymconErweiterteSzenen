@@ -504,11 +504,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 					}
 				}
 			}
-<<<<<<< HEAD
-			//Delete Excessive Automation
-=======
 			//Delete Excessive Automation and DaySets
->>>>>>> beta
 			$sensor = $this->ReadPropertyInteger("Sensor");
 			if($sensor < 9999)
 			{
@@ -829,8 +825,6 @@ SetValue(\$_IPS['VARIABLE'], \$_IPS['VALUE']);
 		array_multisort($arr, SORT_ASC, $d);
 		return $arr;
 	}
-<<<<<<< HEAD
-=======
 
     protected function CreateLink($content)
 	{
@@ -913,6 +907,5 @@ SetValue(\$_IPS['VARIABLE'], \$_IPS['VALUE']);
 			}
 		}
 	}
->>>>>>> beta
 }
 ?>
