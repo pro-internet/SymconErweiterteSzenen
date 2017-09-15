@@ -504,7 +504,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 					}
 				}
 			}
-			//Delete Excessive Automation
+			//Delete Excessive Automation and DaySets
 			$sensor = $this->ReadPropertyInteger("Sensor");
 			if($sensor < 9999)
 			{
@@ -512,6 +512,12 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				{
 					$autoVar = IPS_GetObjectIDByIdent("Automatik", IPS_GetParent($this->InstanceID));
 					IPS_DeleteVariable($autoVar);
+				}
+
+				if(@IPS_GetObjectIDByIdent("Set", IPS_GetParent($this->InstanceID)) !== false)
+				{
+					$setIns = IPS_GetObjectIDByIdent("Set", IPS_GetParent($this->InstanceID));
+					IPS_DeleteVariable($setIns);
 				}
 			}
 		}
