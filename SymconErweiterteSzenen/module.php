@@ -86,7 +86,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				$content["ParentID"] = $insID;
 				$this->CreateLink($content);
 			}
-            //$this->Del($targetsID);
+            $this->Del($targetsID);
 		}
 		
 		//$this->CreateCategoryByIdent($this->InstanceID, "Targets", "Targets");
@@ -867,6 +867,7 @@ SetValue(\$_IPS['VARIABLE'], \$_IPS['VALUE']);
 		}
 		return $id;
 	}
+
 
     protected function Del($id, $bool = false /*Delete associated files along with the objects ?*/)
 	{
