@@ -55,10 +55,12 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		{
 			$DummyGUID = $this->GetModuleIDByName();
 			$insID = IPS_CreateInstance($DummyGUID);
+			$dummyExisted = false;
 		}
 		else
 		{
 			$insID = IPS_GetObjectIDByIdent("Targets", IPS_GetParent($this->InstanceID));
+			$dummyExisted = true;
 		}
 		IPS_SetName($insID, "Targets");
 		IPS_SetParent($insID, IPS_GetParent($this->InstanceID));
@@ -68,13 +70,22 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		//See if theres an old Targets Folder
 		if(@IPS_GetObjectIDByIdent("Targets", $this->InstanceID) !== false)
 		{
-            $targetsID = IPS_GetObjectIDByIdent("Targets", $this->InstanceID);
+			//Resolve Update->Downgrade Patch discrepancy || Delete excessive targets
+			if($dummyExisted)
+			{
+				foreach(IPS_GetChildrenIDs($insID) as $chID)
+				{
+					$this->Del($chID);
+				}
+			}
+			//move targets of "Targets"-Folder into "Targets"-Dummy Instance
+			$targetsID = IPS_GetObjectIDByIdent("Targets", $this->InstanceID);
 			foreach(IPS_GetChildrenIDs($targetsID) as $targetLinkID)
-            {
-                $content = array_merge(IPS_GetObject($targetLinkID), IPS_GetLink($targetLinkID));
-                $content["ParentID"] = $insID;
-                $this->CreateLink($content);
-            }
+			{
+				$content = array_merge(IPS_GetObject($targetLinkID), IPS_GetLink($targetLinkID));
+				$content["ParentID"] = $insID;
+				$this->CreateLink($content);
+			}
             //$this->Del($targetsID);
 		}
 		
