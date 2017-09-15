@@ -71,7 +71,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
             $targetsID = IPS_GetObjectIDByIdent("Targets", $this->InstanceID);
 			foreach(IPS_GetChildrenIDs($targetsID) as $targetLinkID)
             {
-                $content = IPS_GetObject($targetLinkID);
+                $content = array_merge(IPS_GetObject($targetLinkID), IPS_GetLink($targetLinkID));
                 $content["ParentID"] = $insID;
                 $this->CreateLink($content);
             }
