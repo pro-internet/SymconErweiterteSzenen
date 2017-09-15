@@ -514,6 +514,12 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 					IPS_DeleteVariable($autoVar);
 				}
 
+				if(@IPS_GetObjectIDByIdent("Sperre", IPS_GetParent($this->InstanceID)) !== false)
+				{
+					$sperreVar = IPS_GetObjectIDByIdent("Sperre", IPS_GetParent($this->InstanceID));
+					IPS_DeleteVariable($sperreVar);
+				}
+
 				if(@IPS_GetObjectIDByIdent("Set", IPS_GetParent($this->InstanceID)) !== false)
 				{
 					$setIns = IPS_GetObjectIDByIdent("Set", IPS_GetParent($this->InstanceID));
