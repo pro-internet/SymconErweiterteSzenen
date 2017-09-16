@@ -238,6 +238,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 					if(@IPS_GetObjectIDByIdent("Scene".$ID, $this->InstanceID) === false){
 						//Scene
 						$vid = IPS_CreateVariable(1 /* Scene */);
+						IPS_LogMessage("DaySet_Scenes", "Creating new Scene Variable...");
 						SetValue($vid, 2);
 					} else
 					{
@@ -254,6 +255,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 					{
 						//SceneData
 						$vid = IPS_CreateVariable(3 /* SceneData */);
+						IPS_LogMessage("DaySet_Scenes", "Creating new SceneData Variable...");
 					}
 					else
 					{
@@ -486,11 +488,12 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 						}
 						if($entryExists == false)
 						{
-							//copy values of older version of the module to the new one
+							//copy values of older version of the module to the new one (shouldn't occur at all)
 							$excessiveID = str_replace("Scene", "", $ident);
 							$excessiveID = str_replace("Data", "", $excessiveID);
 							if($excessiveID < 9999)
 							{
+								IPS_LogMessage("DaySet_Scenes", "copy values of an older version of the module to the new one");
 								foreach(IPS_GetChildrenIDs($this->InstanceID) as $c)
 								{
 									if(IPS_GetName($c) == IPS_GetName($child) && $c != $child)
@@ -584,6 +587,10 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		$targetIDs = IPS_GetObjectIDByIdent("Targets", IPS_GetParent($this->InstanceID));
 		$data = Array();
 
+		IPS_LogMessage("DaySet_Scenes.SaveValues", "Saving new Scene Data Values...");
+		IPS_LogMessage("DaySet_Scenes.SaveValues", "Targets from ". IPS_GetName(IPS_GetParent($targetIDs)) ."/". IPS_GetName($targetIDs) ." ($targetIDs) are being used)");
+		
+
 		//We want to save all Lamp Values
 		foreach(IPS_GetChildrenIDs($targetIDs) as $TargetID) {
 			//only allow links
@@ -636,6 +643,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				IPS_Sleep(100);
 				IPS_SetEventActive($selectEvent, true);
 
+				IPS_LogMessage("DaySet_Scenes.CallValues", "Calling Values for Scene '".IPS_GetName($sceneVar)."'");
 				//Set the actual values for the targets
 				foreach($data as $id => $value) {
 					if (IPS_VariableExists($id)){
