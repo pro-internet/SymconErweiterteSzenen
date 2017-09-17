@@ -5,6 +5,26 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 	// Modular  //
 	/////////////
 
+	private $docsFileHandle;
+	private $docsFile;
+
+	public function __construct($InstanceID) {
+		//Never delete this line!
+		parent::__construct($InstanceID);
+		
+		$docsPath = str_replace('\\scripts','',getcwd()) . '\\modules\\SymconSzenenDaySet\\docs';
+		$docsFile = $docsPath . '\\' . $this->InstanceID . '.json'; 
+		if (!file_exists($docsPath)) {
+			@mkdir($docsPath, 0777, true);
+		}
+		if (!file_exists($docsFile)) {
+			$fh = @fopen($docsFile, 'r+');
+			@fclose($fh);
+		}
+
+		$this->docsFile = $docsFile;
+	}
+
 	public function Create() {
 		//Never delete this line!
 		parent::Create();
@@ -601,15 +621,38 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				}
 			}
 		}
-		SetValue(IPS_GetObjectIDByIdent($SceneIdent."Data", $this->InstanceID), wddx_serialize_value($data));
+		$sceneDataID = IPS_GetObjectIDByIdent($SceneIdent."Data", $this->InstanceID);
+		$sceneData = wddx_serialize_value($data);
+		SetValue($sceneDataID, $sceneData);
+
+		//write into backup file
+		try
+		{
+			$content = json_decode(file_get_contents($this->docsFile), true);
+			$content[$sceneDataID] = $sceneData;
+			file_put_contents($this->docsFile, json_encode($content));
+		} catch (Exception $e) { 
+			IPS_LogMessage("DaySet_Scenes.SaveValues", "couldn't access backup file: " . $e->getMessage());
+		}
 	}
 
 	private function CallValues($SceneIdent) {
 
 		$actualIdent = str_replace("Sensor", "", $SceneIdent);
 		$selectValue = str_replace("Scene", "", $actualIdent);
-		$data = wddx_deserialize(GetValue(IPS_GetObjectIDByIdent($actualIdent."Data", $this->InstanceID)));
-		if($data != NULL) {
+		$sceneDataID = IPS_GetObjectIDByIdent($SceneIdent."Data", $this->InstanceID);
+		$dataStr = GetValue($sceneDataID);
+		$data = wddx_deserialize($dataStr);
+		if($data != NULL && strlen($dataStr) > 3) {
+			//write into backup file after calling a scene
+			try {
+				$content = json_decode(file_get_contents($this->docsFile), true);
+				$content[$sceneDataID] = $dataStr;
+				file_put_contents($this->docsFile, json_encode($content));
+			} catch (Exception $e) { 
+				IPS_LogMessage("DaySet_Scenes.CallValues", "couldn't access backup file: " . $e->getMessage());
+			}
+
 			if(strpos($SceneIdent, "Sensor") !== false)
 			{
 				if(@IPS_GetObjectIDByIdent("Automatik", IPS_GetParent($this->InstanceID)) !== false)
@@ -672,7 +715,33 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				}
 			}
 		} else {
-			echo "No SceneData for this Scene";
+			$sceneDataID = IPS_GetObjectIDByIdent($actualIdent."Data", $this->InstanceID);
+			$data = GetValue($sceneDataID);
+			//Scene Data Variable is completely empty, as in never saved any values to it
+			if(strlen($data) < 3)
+			{
+				try {
+					$content = json_decode(file_get_contents($this->docsFile), true);
+					if(array_key_exists($sceneDataID, $content))
+					{
+						if(strlen($content[$sceneDataID]) > 3)
+						{
+							SetValue($sceneDataID, $content[$sceneDataID]);
+							$this->CallValues($SceneIdent);
+						}
+					}
+					else
+					{
+						echo "No SceneData for this Scene";
+					}
+				} catch (Exception $e) { 
+					IPS_LogMessage("DaySet_Scenes.CallValues", "couldn't access backup file when SceneData was empty: " . $e->getMessage());
+				}
+			}
+			else
+			{
+				echo "No SceneData for this Scene";
+			}
 		}
 	}
 
