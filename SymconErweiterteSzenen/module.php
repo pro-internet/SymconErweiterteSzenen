@@ -628,7 +628,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		//write into backup file
 		try
 		{
-			$content = json_decode(file_get_contents($this->docsFile), true);
+			$content = json_decode(@file_get_contents($this->docsFile), true);
 			$content[$sceneDataID] = $sceneData;
 			file_put_contents($this->docsFile, json_encode($content));
 		} catch (Exception $e) { 
@@ -646,7 +646,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		if($data != NULL && strlen($dataStr) > 3) {
 			//write into backup file after calling a scene
 			try {
-				$content = json_decode(file_get_contents($this->docsFile), true);
+				$content = json_decode(@file_get_contents($this->docsFile), true);
 				$content[$sceneDataID] = $dataStr;
 				file_put_contents($this->docsFile, json_encode($content));
 			} catch (Exception $e) { 
@@ -721,7 +721,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			if(strlen($data) < 3)
 			{
 				try {
-					$content = json_decode(file_get_contents($this->docsFile), true);
+					$content = json_decode(@file_get_contents($this->docsFile), true);
 					if(array_key_exists($sceneDataID, $content))
 					{
 						if(strlen($content[$sceneDataID]) > 3)
