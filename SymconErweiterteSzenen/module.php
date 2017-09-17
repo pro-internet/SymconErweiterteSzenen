@@ -18,7 +18,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			@mkdir($docsPath, 0777, true);
 		}
 		if (!file_exists($docsFile)) {
-			$fh = @fopen($docsFile, 'r+');
+			$fh = @fopen($docsFile, 'w');
 			@fclose($fh);
 		}
 
