@@ -12,7 +12,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		//Never delete this line!
 		parent::__construct($InstanceID);
 		
-		$docsPath = $_SERVER['USERPROFILE'] . '\Documents\Symcon Modules';
+		$docsPath = $_ENV['PUBLIC'] . '\Documents\Symcon Modules';
 		$docsFile = $docsPath . '\\' . $this->InstanceID . '.json'; 
 		if (!file_exists($docsPath)) {
 			@mkdir($docsPath, 0777, true);
