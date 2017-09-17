@@ -630,7 +630,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		{
 			$content = json_decode(@file_get_contents($this->docsFile), true);
 			$content[$sceneDataID] = $sceneData;
-			file_put_contents($this->docsFile, json_encode($content));
+			@file_put_contents($this->docsFile, json_encode($content));
 		} catch (Exception $e) { 
 			IPS_LogMessage("DaySet_Scenes.SaveValues", "couldn't access backup file: " . $e->getMessage());
 		}
@@ -648,7 +648,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			try {
 				$content = json_decode(@file_get_contents($this->docsFile), true);
 				$content[$sceneDataID] = $dataStr;
-				file_put_contents($this->docsFile, json_encode($content));
+				@file_put_contents($this->docsFile, json_encode($content));
 			} catch (Exception $e) { 
 				IPS_LogMessage("DaySet_Scenes.CallValues", "couldn't access backup file: " . $e->getMessage());
 			}
