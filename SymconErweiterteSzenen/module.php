@@ -112,7 +112,10 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		//$this->CreateCategoryByIdent($this->InstanceID, "Targets", "Targets");
 		$data = json_decode($this->ReadPropertyString("Names"),true);
 
-		if($data != "")
+		$cnt = sizeof($data) * 2 + 2;
+		$c = IPS_GetChildrenIDs($this->instanceID);
+
+		if($data != "" && $c != $cnt /*if not update but scene added*/)
 		{
 			IPS_SetPosition($this->InstanceID, -700);
 
