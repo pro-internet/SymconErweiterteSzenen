@@ -221,7 +221,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			{
 				$eventsCat = IPS_GetObjectIDByIdent("EventsCat", $this->InstanceID);
 			}
-			
+			print_r($data);
 			$noPos = true;
 			foreach($data as $d)
 			{
