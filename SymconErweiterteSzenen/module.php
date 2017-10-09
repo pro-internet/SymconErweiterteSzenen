@@ -120,38 +120,46 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			IPS_SetPosition($this->InstanceID, -700);
 
 			//copy Values of the Sets and Selector Profile
-			if(@IPS_GetObjectIDByIdent("Set", IPS_GetParent($this->InstanceID)) !== false)
-			{
-				$setSavedValues = array();
-				$setIns = IPS_GetObjectIDByIdent("Set", IPS_GetParent($this->InstanceID));
-				foreach(IPS_GetChildrenIDs($setIns) as $l => $child)
-				{
-					$setSavedValues[$l]['obj'] = IPS_GetObject($child);
-					$setSavedValues[$l]['var'] = IPS_GetVariable($child);
-					$setSavedValues[$l]['var']['Value'] = GetValue($child);
-					$setSavedValues[$l]['profile'] = IPS_GetVariableProfile("ESZS.Selector" . $this->InstanceID);
-				}
-			}
+			// if(@IPS_GetObjectIDByIdent("Set", IPS_GetParent($this->InstanceID)) !== false)
+			// {
+			// 	$setSavedValues = array();
+			// 	$setIns = IPS_GetObjectIDByIdent("Set", IPS_GetParent($this->InstanceID));
+			// 	foreach(IPS_GetChildrenIDs($setIns) as $l => $child)
+			// 	{
+			// 		$setSavedValues[$l]['obj'] = IPS_GetObject($child);
+			// 		$setSavedValues[$l]['var'] = IPS_GetVariable($child);
+			// 		$setSavedValues[$l]['var']['Value'] = GetValue($child);
+			// 		$setSavedValues[$l]['profile'] = IPS_GetVariableProfile("ESZS.Selector" . $this->InstanceID);
+			// 	}
+			// }
 			
 			//check if the scenes were already created with IDs but it was patched down
 			if($data[0]['ID'] == null || $data[0]['ID'] == 0)
 			{
-				foreach(IPS_GetChildrenIDs($this->InstanceID) as $i => $child)
+				$childrenIDs = IPS_GetChildrenIDs($this->InstanceID);
+				if(sizeof($childrenIDs > 0))
 				{
-					$ident = IPS_GetObject($child)['ObjectIdent'];
-					if(strpos($ident, "Scene") !== false && strpos($ident, "Data") !== true)
+					foreach($childrenIDs as $i => $child)
 					{
-						$ID = str_replace("Scene", "", $ident);
-						if($ID > 9999)
+						$ident = IPS_GetObject($child)['ObjectIdent'];
+						if(strpos($ident, "Scene") !== false && strpos($ident, "Data") !== true)
 						{
-							$configModule = json_decode(IPS_GetConfiguration($this->InstanceID), true);
-							$data[$i]['ID'] = $ID;
-							$configModule['Names'] = json_encode($data);
-							$configJSON = json_encode($configModule);
-							IPS_SetConfiguration($this->InstanceID, $configJSON);
-							IPS_ApplyChanges($this->InstanceID);
+							$ID = str_replace("Scene", "", $ident);
+							if($ID > 9999)
+							{
+								if(@IPS_GetObjectIDByIdent("EventsCat", $this->InstanceID) === false)
+									$data[$i]['ID'] = $ID;
+								else
+									$data[$i - 1]['ID'] = $ID;
+							}
 						}
 					}
+					$configModule = json_decode(IPS_GetConfiguration($this->InstanceID), true);
+					$configModule['Names'] = json_encode($data);
+					$configJSON = json_encode($configModule);
+					IPS_SetConfiguration($this->InstanceID, $configJSON);
+					IPS_ApplyChanges($this->InstanceID);
+					return;
 				}
 			}
 
@@ -178,10 +186,12 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 					}
 				}
 			}
+
 			if($update)
 			{
 				IPS_SetConfiguration($this->InstanceID, $configJSON);
 				IPS_ApplyChanges($this->InstanceID);
+				return;
 			}
 			
 			//Selector profile
@@ -205,6 +215,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				IPS_SetIdent($eventsCat, "EventsCat");
 				IPS_SetParent($eventsCat, $this->InstanceID);
 				IPS_SetHidden($eventsCat, true);
+				IPS_SetPosition($eventsCat, -1000);
 			}
 			else
 			{
@@ -232,11 +243,35 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				IPS_SetConfiguration($this->InstanceID, $configJSON);
 				IPS_ApplyChanges($this->InstanceID);
 				$standBy = true;
+				return;
 			}
 			
 			$standBy = false;
 			if($update === false)
 			{
+				$reload = false;
+				for($i = 0; $i < sizeof($data); $i++)
+				{
+					$ID = @$data[$i]['ID'];
+					//Set Configuration for new Scenes
+					if($ID == 0 || $ID == null)
+					{
+						$ID = rand(10000, 99999);
+						$data[$i]['ID'] = $ID;
+						$standBy = true;
+						$reload = true;
+					}
+				}
+
+				if($reload)
+				{
+					$configModule = json_decode(IPS_GetConfiguration($this->InstanceID), true);
+					$configModule['Names'] = json_encode($data);
+					$configJSON = json_encode($configModule);
+					IPS_SetConfiguration($this->InstanceID, $configJSON);
+					IPS_ApplyChanges($this->InstanceID);
+				}
+
 				for($i = 0; $i < sizeof($data); $i++)
 				{
 					$data = json_decode($this->ReadPropertyString("Names"),true);
@@ -244,20 +279,6 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 					if($noPos)
 						$data[$i]['Position'] = $i;
 					$ID = @$data[$i]['ID'];
-					//Set Configuration for new Scenes
-					if($ID == 0 || $ID == null)
-					{
-						$configModule = json_decode(IPS_GetConfiguration($this->InstanceID), true);
-						$ID = rand(10000, 99999);
-						$data[$i]['ID'] = $ID;
-						$configModule['Names'] = json_encode($data);
-						$configJSON = json_encode($configModule);
-						IPS_SetConfiguration($this->InstanceID, $configJSON);
-						IPS_ApplyChanges($this->InstanceID);
-						$standBy = true;
-						break;
-					}
-					
 					if(@IPS_GetObjectIDByIdent("Scene".$ID, $this->InstanceID) === false){
 						//Scene
 						$vid = IPS_CreateVariable(1 /* Scene */);
@@ -296,31 +317,31 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			}
 
 			//fix newly added scenes breaking "Sets" presets
-			if(@IPS_GetObjectIDByIdent("Set", IPS_GetParent($this->InstanceID)) !== false)
-			{	
-				$setIns = IPS_GetObjectIDByIdent("Set", IPS_GetParent($this->InstanceID));
-				foreach(IPS_GetChildrenIDs($setIns) as $l => $child)
-				{
-					$o = IPS_GetObject($child);
-					if(isset($setSavedValues))
-					{
-						foreach($setSavedValues as $stateSavedValues)
-						{
-							if($stateSavedValues['obj']['ObjectIdent'] == $o['ObjectIdent'])
-							{
-								$savedName = @$stateSavedValues['profile']['Associations'][$stateSavedValues['var']['Value']]['Name'];
-								$currentName = @IPS_GetVariableProfile("ESZS.Selector" . $this->InstanceID)['Associations'][GetValue($child)]['Name'];
-								if($savedName != $currentName)
-								{
-									$assoc = $this->GetAssociationByName("ESZS.Selector" . $this->InstanceID, $savedName);
-									if($assoc !== false)
-										SetValue($child, $assoc);
-								}
-							}
-						}
-					}
-				}
-			}
+			// if(@IPS_GetObjectIDByIdent("Set", IPS_GetParent($this->InstanceID)) !== false)
+			// {	
+			// 	$setIns = IPS_GetObjectIDByIdent("Set", IPS_GetParent($this->InstanceID));
+			// 	foreach(IPS_GetChildrenIDs($setIns) as $l => $child)
+			// 	{
+			// 		$o = IPS_GetObject($child);
+			// 		if(isset($setSavedValues))
+			// 		{
+			// 			foreach($setSavedValues as $stateSavedValues)
+			// 			{
+			// 				if($stateSavedValues['obj']['ObjectIdent'] == $o['ObjectIdent'])
+			// 				{
+			// 					$savedName = @$stateSavedValues['profile']['Associations'][$stateSavedValues['var']['Value']]['Name'];
+			// 					$currentName = @IPS_GetVariableProfile("ESZS.Selector" . $this->InstanceID)['Associations'][GetValue($child)]['Name'];
+			// 					if($savedName != $currentName)
+			// 					{
+			// 						$assoc = $this->GetAssociationByName("ESZS.Selector" . $this->InstanceID, $savedName);
+			// 						if($assoc !== false)
+			// 							SetValue($child, $assoc);
+			// 					}
+			// 				}
+			// 			}
+			// 		}
+			// 	}
+			// }
 
 			//Selector Variable
 			if(@IPS_GetObjectIDByIdent("Selector", IPS_GetParent($this->InstanceID)) === false)
