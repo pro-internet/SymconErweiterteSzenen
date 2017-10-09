@@ -118,7 +118,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		if($data != "" && $c != $cnt /*if not update but scene added*/)
 		{
 			IPS_LogMessage("new scene","s");
-			return;
+			
 			IPS_SetPosition($this->InstanceID, -700);
 
 			//copy Values of the Sets and Selector Profile
