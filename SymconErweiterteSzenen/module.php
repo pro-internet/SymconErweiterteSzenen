@@ -2,7 +2,7 @@
 class ErweiterteSzenenSteuerung extends IPSModule {
 
 	/////////////
-	// Modular  //
+	// new     //
 	/////////////
 
 	public $status;
