@@ -113,7 +113,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		$data = json_decode($this->ReadPropertyString("Names"),true);
 
 		$cnt = sizeof($data) * 2 + 2;
-		$c = IPS_GetChildrenIDs($this->instanceID);
+		$c = sizeof(IPS_GetChildrenIDs($this->InstanceID));
 
 		if($data != "" && $c != $cnt /*if not update but scene added*/)
 		{
