@@ -109,7 +109,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
             $this->Del($targetsID);
 		}
 		
-		//$this->CreateCategoryByIdent($this->InstanceID, "Targets", "Targets");
+		//$this->CreateCategoryByIdent($this->InstanceID, "Targets", "Targets"); /
 		$data = json_decode($this->ReadPropertyString("Names"),true);
 
 		$cnt = sizeof($data) * 2 + 2;
