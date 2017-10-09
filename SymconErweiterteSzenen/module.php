@@ -69,7 +69,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 		$this->RemoveExcessiveProfiles("ESZS.Selector");
 		$this->RemoveExcessiveProfiles("ESZS.Sets");
-		
+		return;
         //Create Targets Dummy Instance
 		if(@IPS_GetObjectIDByIdent("Targets", IPS_GetParent($this->InstanceID)) === false)
 		{
