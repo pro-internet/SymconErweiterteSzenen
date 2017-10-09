@@ -230,7 +230,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				IPS_ApplyChanges($this->InstanceID);
 				$standBy = true;
 			}
-			
+			return;
 			$standBy = false;
 			if($update === false)
 			{
