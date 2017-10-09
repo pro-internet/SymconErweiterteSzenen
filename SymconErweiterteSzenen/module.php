@@ -112,7 +112,10 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		//$this->CreateCategoryByIdent($this->InstanceID, "Targets", "Targets");
 		$data = json_decode($this->ReadPropertyString("Names"),true);
 
-		if($data != "" && false)
+		$cnt = sizeof($data) * 2 + 2;
+		$c = IPS_GetChildrenIDs($this->instanceID);
+
+		if($data != "" && $c != $cnt /*if not update but scene added*/)
 		{
 			IPS_SetPosition($this->InstanceID, -700);
 			
@@ -249,38 +252,38 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				}
 			}
 
+			$svs = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
 			//Selector Variable
 			if(@IPS_GetObjectIDByIdent("Selector", IPS_GetParent($this->InstanceID)) === false)
 			{
 				$vid = IPS_CreateVariable(1);
+				IPS_SetParent($vid, IPS_GetParent($this->InstanceID));
+				IPS_SetName($vid, IPS_GetName($this->InstanceID));
+				IPS_SetIdent($vid, "Selector");
+				IPS_SetPosition($vid, 600);
+				IPS_SetVariableCustomProfile($vid, "ESZS.Selector" . $this->InstanceID);
+				IPS_SetVariableCustomAction($vid, $svs);
 			}
 			else
 			{
 				$vid = IPS_GetObjectIDByIdent("Selector", IPS_GetParent($this->InstanceID));
 			}
-			$svs = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
-			IPS_SetParent($vid, IPS_GetParent($this->InstanceID));
-			IPS_SetName($vid, IPS_GetName($this->InstanceID));
-			IPS_SetIdent($vid, "Selector");
-			IPS_SetPosition($vid, 600);
-			IPS_SetVariableCustomProfile($vid, "ESZS.Selector" . $this->InstanceID);
-			IPS_SetVariableCustomAction($vid, $svs);
-
+			
 			//Create Selector event
 			if(@IPS_GetObjectIDByIdent("SelectorOnChange", $eventsCat) === false)
 			{
 				$eid = IPS_CreateEvent(0);
+				IPS_SetParent($eid, $eventsCat);
+				IPS_SetName($eid, "Selector.OnChange");
+				IPS_SetIdent($eid, "SelectorOnChange");
+				IPS_SetEventTrigger($eid, 0, $vid);
+				IPS_SetEventActive($eid, true);
+				IPS_SetEventScript($eid, "ESZS_CallScene(". $this->InstanceID .", GetValue($vid));");
 			}
 			else
 			{
 				$eid = IPS_GetObjectIDByIdent("SelectorOnChange", $eventsCat);
 			}
-			IPS_SetParent($eid, $eventsCat);
-			IPS_SetName($eid, "Selector.OnChange");
-			IPS_SetIdent($eid, "SelectorOnChange");
-			IPS_SetEventTrigger($eid, 0, $vid);
-			IPS_SetEventActive($eid, true);
-			IPS_SetEventScript($eid, "ESZS_CallScene(". $this->InstanceID .", GetValue($vid));");
 
 			//Create Sensor event
 			$sensorID = $this->ReadPropertyInteger("Sensor");
@@ -293,43 +296,54 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				if(@IPS_GetObjectIDByIdent("SensorEvent", $eventsCat) === false)
 				{
 					$eid = IPS_CreateEvent(0);
+					IPS_SetEventTrigger($eid, 1, $sensorID);
+					IPS_SetEventScript($eid, "ESZS_CallScene(". $this->InstanceID .", ($sensorID *100));");
+					IPS_SetEventActive($eid, true);
+					IPS_SetParent($eid, $eventsCat);
+					IPS_SetName($eid, "Sensor.OnChange");
+					IPS_SetIdent($eid, "SensorEvent");
 				}
 				else
 				{
 					$eid = IPS_GetObjectIDByIdent("SensorEvent", $eventsCat);
-				}
-				IPS_SetEventTrigger($eid, 1, $sensorID);
-				IPS_SetEventScript($eid, "ESZS_CallScene(". $this->InstanceID .", ($sensorID *100));");
-				IPS_SetEventActive($eid, true);
-				IPS_SetParent($eid, $eventsCat);
-				IPS_SetName($eid, "Sensor.OnChange");
-				IPS_SetIdent($eid, "SensorEvent");
+				}	
 			}
 
 			//Create Automatik for this instance
 			if(@IPS_GetObjectIDByIdent("Automatik", IPS_GetParent($this->InstanceID)) === false)
+			{
 				$vid = IPS_CreateVariable(0);
+				IPS_SetName($vid, "Automatik");
+				IPS_SetParent($vid, IPS_GetParent($this->InstanceID));
+				IPS_SetPosition($vid, -999);
+				IPS_SetIdent($vid, "Automatik");
+				IPS_SetVariableCustomAction($vid, $svs);
+				IPS_SetVariableCustomProfile($vid, "Switch");
+			}
 			else
+			{
 				$vid = IPS_GetObjectIDByIdent("Automatik", IPS_GetParent($this->InstanceID));
-			IPS_SetName($vid, "Automatik");
-			IPS_SetParent($vid, IPS_GetParent($this->InstanceID));
-			IPS_SetPosition($vid, -999);
-			IPS_SetIdent($vid, "Automatik");
-			IPS_SetVariableCustomAction($vid, $svs);
-			IPS_SetVariableCustomProfile($vid, "Switch");
+			}
+			
 
 			//Create Event for Automatik
 			if(@IPS_GetObjectIDByIdent("AutomatikEvent", $eventsCat) === false)
+			{
 				$eid = IPS_CreateEvent(0);
+				IPS_SetEventTrigger($eid, 4, $vid);
+				IPS_SetEventTriggerValue($eid, true);
+				IPS_SetEventScript($eid, "ESZS_CallScene(". $this->InstanceID .", ($sensorID *100));");
+				IPS_SetEventActive($eid, true);
+				IPS_SetParent($eid, $eventsCat);
+				IPS_SetName($eid, "Automatik.OnTrue");
+				IPS_SetIdent($eid, "AutomatikEvent");
+			}
 			else
+			{
 				$eid = IPS_GetObjectIDByIdent("AutomatikEvent", $eventsCat);
-			IPS_SetEventTrigger($eid, 4, $vid);
-			IPS_SetEventTriggerValue($eid, true);
-			IPS_SetEventScript($eid, "ESZS_CallScene(". $this->InstanceID .", ($sensorID *100));");
-			IPS_SetEventActive($eid, true);
-			IPS_SetParent($eid, $eventsCat);
-			IPS_SetName($eid, "Automatik.OnTrue");
-			IPS_SetIdent($eid, "AutomatikEvent");
+			}
+				
+			
 
 			//Create Sperre for this instance
 			if(@IPS_GetObjectIDByIdent("Sperre", IPS_GetParent($this->InstanceID)) === false)
