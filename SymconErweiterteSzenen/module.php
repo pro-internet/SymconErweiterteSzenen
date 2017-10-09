@@ -118,7 +118,6 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		if($data != "" && $c != $cnt /*if not update but scene added*/)
 		{
 			IPS_LogMessage("Scenes are added", "s");
-			return;
 			IPS_SetPosition($this->InstanceID, -700);
 			
 			//check if the scenes were already created with IDs but it was patched down
