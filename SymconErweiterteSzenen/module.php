@@ -5,24 +5,10 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 	// Modular  //
 	/////////////
 
-	private $docsFileHandle;
-	private $docsFile;
-
 	public function __construct($InstanceID) {
 		//Never delete this line!
 		parent::__construct($InstanceID);
 		
-		$docsPath = $_ENV['PUBLIC'] . '\Documents\Symcon Modules';
-		$docsFile = $docsPath . '\\' . $this->InstanceID . '.json'; 
-		if (!file_exists($docsPath)) {
-			@mkdir($docsPath, 0777, true);
-		}
-		if (!file_exists($docsFile)) {
-			$fh = @fopen($docsFile, 'w');
-			@fclose($fh);
-		}
-
-		$this->docsFile = $docsFile;
 	}
 
 	public function Create() {
@@ -70,44 +56,58 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		$this->RemoveExcessiveProfiles("ESZS.Selector");
 		$this->RemoveExcessiveProfiles("ESZS.Sets");
 		
+		//Get the content of the Table
+		$dataString = $this->ReadPropertyString("Names");
+		//check if the Table String is empty
+		if($dataString != "")
+		{
+			$data = json_decode($dataString, true);
+			//make sure the Content of the Table is valid
+			if(sizeof($data) > 0)
+			{
+				$ident = GetObject($cid)['ObjectIdent'];
+				$reload = false;
+				foreach($data as $i => $entry)
+				{
+					//check if a Valid ID is set to this entry
+					if(array_key_exists($entry, 'ID'))
+					{
+						if($entry['ID'] == 0 || $entry['ID'] == null)
+						{
+							//Set a new ID in case no ID was set
+							$data[$i] = rand(10000, 99999);
+							//tell the rest of the script to reload down the line with the new IDs
+							$reload = true;
+						}
+					}
+				}
+
+				//reload the Modules apply changes function with the newly added IDs
+				if($reload)
+				{
+					$configModule = json_decode(IPS_GetConfiguration($this->InstanceID), true);
+					$configModule['Names'] = json_encode($data);
+					IPS_SetConfiguration($this->InstanceID, $configJSON);
+					#IPS_ApplyChanges($this->InstanceID);
+				}
+			}
+		}
+		return;
         //Create Targets Dummy Instance
 		if(@IPS_GetObjectIDByIdent("Targets", IPS_GetParent($this->InstanceID)) === false)
 		{
 			$DummyGUID = $this->GetModuleIDByName();
 			$insID = IPS_CreateInstance($DummyGUID);
-			$dummyExisted = false;
+			IPS_SetName($insID, "Targets");
+			IPS_SetParent($insID, IPS_GetParent($this->InstanceID));
+			IPS_SetPosition($insID, 9999);
+			IPS_SetIdent($insID, "Targets");
 		}
 		else
 		{
 			$insID = IPS_GetObjectIDByIdent("Targets", IPS_GetParent($this->InstanceID));
-			$dummyExisted = true;
 		}
-		IPS_SetName($insID, "Targets");
-		IPS_SetParent($insID, IPS_GetParent($this->InstanceID));
-		IPS_SetPosition($insID, 9999);
-		IPS_SetIdent($insID, "Targets");
-
-		//See if theres an old Targets Folder
-		if(@IPS_GetObjectIDByIdent("Targets", $this->InstanceID) !== false)
-		{
-			//Resolve Update->Downgrade Patch discrepancy || Delete excessive targets
-			if($dummyExisted)
-			{
-				foreach(IPS_GetChildrenIDs($insID) as $chID)
-				{
-					$this->Del($chID);
-				}
-			}
-			//move targets of "Targets"-Folder into "Targets"-Dummy Instance
-			$targetsID = IPS_GetObjectIDByIdent("Targets", $this->InstanceID);
-			foreach(IPS_GetChildrenIDs($targetsID) as $targetLinkID)
-			{
-				$content = array_merge(IPS_GetObject($targetLinkID), IPS_GetLink($targetLinkID));
-				$content["ParentID"] = $insID;
-				$this->CreateLink($content);
-			}
-            $this->Del($targetsID);
-		}
+		
 		
 		//$this->CreateCategoryByIdent($this->InstanceID, "Targets", "Targets");
 		$data = json_decode($this->ReadPropertyString("Names"),true);
