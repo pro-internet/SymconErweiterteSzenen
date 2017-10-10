@@ -215,7 +215,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 					$eid = IPS_GetObjectIDByIdent("SensorEvent", $eventsCat);
 				}
 				IPS_SetEventTrigger($eid, 1, $sensorID);
-				IPS_SetEventScript($eid, "ESZS_CallScene(". $this->InstanceID .", $sensorID);");
+				IPS_SetEventScript($eid, "ESZS_CallScene(". $this->InstanceID .", ($sensorID*100));");
 				IPS_SetEventActive($eid, true);
 				IPS_SetParent($eid, $eventsCat);
 				IPS_SetName($eid, "Sensor.OnChange");
@@ -241,7 +241,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				$eid = IPS_GetObjectIDByIdent("AutomatikEvent", $eventsCat);
 			IPS_SetEventTrigger($eid, 4, $vid);
 			IPS_SetEventTriggerValue($eid, true);
-			IPS_SetEventScript($eid, "ESZS_CallScene(". $this->InstanceID .", $sensorID);");
+			IPS_SetEventScript($eid, "ESZS_CallScene(". $this->InstanceID .", ($sensorID*100));");
 			IPS_SetEventActive($eid, true);
 			IPS_SetParent($eid, $eventsCat);
 			IPS_SetName($eid, "Automatik.OnTrue");
@@ -336,7 +336,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 					else
 						$eid = IPS_GetObjectIDByIdent("SetEvent$i", $eventsCat);
 					IPS_SetEventTrigger($eid, 1, $vid);
-					IPS_SetEventScript($eid, "ESZS_CallScene(" . $this->InstanceID . ", $sensorID);");
+					IPS_SetEventScript($eid, "ESZS_CallScene(" . $this->InstanceID . ", ($sensorID*100));");
 					IPS_SetName($eid, "$state".".OnChange");
 					IPS_SetParent($eid, $eventsCat);
 					IPS_SetIdent($eid, "SetEvent$i");
