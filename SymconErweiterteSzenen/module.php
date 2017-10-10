@@ -355,7 +355,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 						if($entry['name'] == null || array_key_exists('ID', $entry) !== true)
 						{
 							//Set a new ID in case no ID was set
-							$data[$i]['name'] = Szene$i;
+							$data[$i]['name'] = "Szene$i";
 							//tell the rest of the script to reload down the line with the new IDs
 							$reiterate = true;
 							$this->SetStatus('reiterating');
