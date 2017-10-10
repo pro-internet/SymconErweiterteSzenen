@@ -32,7 +32,6 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		
 		$this->RemoveExcessiveProfiles("ESZS.Selector");
 		$this->RemoveExcessiveProfiles("ESZS.Sets");
-		$this->CreateCategoryByIdent($this->InstanceID, "Targets", "Targets");
 		$data = json_decode($this->ReadPropertyString("Names"),true);
 		
 		if($data != "")
@@ -50,6 +49,46 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				IPS_CreateVariableProfile("ESZS.Selector" . $this->InstanceID, 1);
 			}
 			
+			//Targets Dummy
+			if(@IPS_GetObjectIDByIdent("Targets", IPS_GetParent($this->InstanceID)) === false)
+			{
+				$dummyGUID = $this->GetModuleIDByName();
+				$insID = IPS_CreateInstance($dummyGUID);
+				IPS_SetParent($insID, IPS_GetParent($this->InstanceID));
+				IPS_SetIdent($insID, "Targets");
+			}
+			else
+			{
+				$insID = IPS_GetObjectIDByIdent("Targets", IPS_GetParent($this->InstanceID));
+			}
+			IPS_SetName($insID, "Targets");
+
+			if(@IPS_GetObjectIDByIdent("Targets", $this->InstanceID) !== false)
+			{
+				$oldTargetsCategory = IPS_GetObjectIDByIdent("Targets", $this->InstanceID);
+				if(sizeof(IPS_GetChildrenIDs($insID)) < 1)
+				{
+					$newTargetsDummy = $insID;
+					foreach(IPS_GetChildrenIDs($oldTargetsCategory) as $child)
+					{
+						if(IPS_LinkExists($child))
+						{
+							$o = IPS_GetObject($child);
+							$o['ParentID'] = $newTargetsDummy;
+							$l = IPS_GetLink($child);
+							$content = array_merge($o, $l);
+							IPS_DeleteLink($child);
+							$this->CreateLink($content);
+						}
+					}
+				}
+				foreach(IPS_GetChildrenIDs($oldTargetsCategory) as $child)
+				{
+					IPS_DeleteLink($child);
+				}
+				IPS_DeleteCategory($oldTargetsCategory);
+			}
+
 			//Events Category
 			if(@IPS_GetObjectIDByIdent("EventsCat", $this->InstanceID) === false)
 			{
@@ -380,7 +419,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 	}
 	private function SaveValues($SceneIdent) {
 		
-		$targetIDs = IPS_GetObjectIDByIdent("Targets", $this->InstanceID);
+		$targetIDs = IPS_GetObjectIDByIdent("Targets", IPS_GetParent($this->InstanceID));
 		$data = Array();
 		
 		//We want to save all Lamp Values
@@ -470,7 +509,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		 $cid = @IPS_GetObjectIDByIdent($ident, $id);
 		 if($cid === false) {
 			 $cid = IPS_CreateCategory();
-			 IPS_SetParent($cid, $id);
+			 IPS_SetParent($cid, $parent);
 			 IPS_SetName($cid, $name);
 			 IPS_SetIdent($cid, $ident);
 		 }
@@ -570,6 +609,51 @@ SetValue(\$_IPS['VARIABLE'], \$_IPS['VALUE']);
 			}
 			return $insID;
 		}
+	}
+
+	protected function CreateLink($content)
+	{
+		/**
+		 * 
+		 * 
+		 * @param <array> $content 
+		 * 
+		 * @return <integer> $LinkID
+		 
+		$content = array("ObjectName" => "LinkName",
+						 "ParentID" => ParentID,
+						 "ObjectIdent" => "Identity",
+						 "TargetID" => TargetID,
+						 "ObjectInfo" => "Info", //optional
+						 "ObjectIsHidden" => Boolean, //optional
+						 "ObjectPosition" => position, //optional
+						 "ObjectIcon" => "Icon" //optional
+						)
+		 */
+		
+		if(@IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["parentID"]) === false)
+		{
+			$id = IPS_CreateLink();
+			IPS_SetName($id, $content['ObjectName']);
+			IPS_SetParent($id, $content['ParentID']);
+			IPS_SetIdent($id, $content['ObjectIdent']);
+			if(array_key_exists("ObjectInfo", $content))
+				IPS_SetInfo($id, $content["ObjectInfo"]);
+			if(array_key_exists("ObjectIsHidden", $content))
+				IPS_SetHidden($id, $content["ObjectIsHidden"]);
+			if(array_key_exists("ObjectPosition", $content))
+				IPS_SetPosition($id, $content["ObjectPosition"]);
+			if(array_key_exists("ObjectIcon", $content))
+				IPS_SetIcon($id, $content["ObjectIcon"]);
+			IPS_SetLinkTargetID($id, $content["TargetID"]);
+		}
+		else
+		{
+			if(@IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]) !== false)
+				$id = IPS_GetObjectIDByIdent($content["ObjectIdent"], $content["ParentID"]);
+		}
+
+		return $id;
 	}
 	
 	private function IPS_GetObjectIDByName($name, $parent)
