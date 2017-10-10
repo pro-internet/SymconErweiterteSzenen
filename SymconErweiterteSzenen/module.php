@@ -360,32 +360,18 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		}
 	}
 	public function CallScene(int $SceneNumber){
-		if($SceneNumber > 99999) //sender = Sensor
+		if($SceneNumber > 9999) //sender = Sensor
 		{
 			$SceneNumber = floor($SceneNumber/100);
 			$sensorWert = GetValue($SceneNumber) - 1;
 			$setsIns = IPS_GetObjectIDByIdent("Set", IPS_GetParent($this->InstanceID));
 			$set = IPS_GetObjectIDByIdent("set$sensorWert", $setsIns);
 			$ActualSceneNumber = GetValue($set);
-			//Get Scene Identity by Association name 
-			$assoc = IPS_GetVariableProfile("ESZS.Selector" . $this->InstanceID)['Associations'][$ActualSceneNumber];
-			$sceneVar = IPS_GetObjectIDByName($assoc['Name'], $this->InstanceID);
-			$actualIdent = IPS_GetObject($sceneVar)['ObjectIdent'];
-			$this->CallValues($actualIdent."Sensor");
+			$this->CallValues("Scene".$ActualSceneNumber."Sensor");
 		}
 		else
 		{
-			if($SceneNumber < 10000) //sender = selector
-			{
-				$assoc = IPS_GetVariableProfile("ESZS.Selector" . $this->InstanceID)['Associations'][$SceneNumber];
-				$sceneVar = IPS_GetObjectIDByName($assoc['Name'], $this->InstanceID);
-				$actualIdent = IPS_GetObject($sceneVar)['ObjectIdent'];
-				$this->CallValues($actualIdent);
-			}
-			else
-			{
-				$this->CallValues("Scene".$SceneNumber);
-			}
+			$this->CallValues("Scene".$SceneNumber);
 		}
 	}
 	public function SaveScene(int $SceneNumber){
