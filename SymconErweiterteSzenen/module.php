@@ -410,12 +410,19 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 					$automatikID = IPS_GetObjectIDByIdent("Automatik", IPS_GetParent($this->InstanceID));
 					$auto = GetValue($automatikID);
 				}
+				
+			 	if(@IPS_GetObjectIDByIdent("Sperre", IPS_GetParent($this->InstanceID)) !== false)
+				{
+					$SperreID = IPS_GetObjectIDByIdent("Sperre", IPS_GetParent($this->InstanceID));
+					$sperre = GetValue($SperreID);
+				}
 			}
 			else
 			{
 				$auto = true;
+				$sperre = false;
 			}
-			if($auto)
+			if($auto && !$sperre)
 			{
 				//Set Selector to current Scene
 				$selectVar = IPS_GetObjectIDByIdent("Selector", IPS_GetParent($this->InstanceID));
