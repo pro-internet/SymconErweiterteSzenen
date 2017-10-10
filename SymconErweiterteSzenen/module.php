@@ -208,6 +208,30 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			IPS_SetName($eid, "Automatik.OnTrue");
 			IPS_SetIdent($eid, "AutomatikEvent");
 			
+			//Create Sperre for this instance
+			if(@IPS_GetObjectIDByIdent("Sperre", IPS_GetParent($this->InstanceID)) === false)
+				$vid = IPS_CreateVariable(0);
+			else
+				$vid = IPS_GetObjectIDByIdent("Sperre", IPS_GetParent($this->InstanceID));
+			IPS_SetName($vid, "Sperre");
+			IPS_SetParent($vid, IPS_GetParent($this->InstanceID));
+			IPS_SetPosition($vid, -999);
+			IPS_SetIdent($vid, "Sperre");
+			IPS_SetVariableCustomAction($vid, $svs);
+			IPS_SetVariableCustomProfile($vid, "Switch");
+			//Create Event for Sperre
+			if(@IPS_GetObjectIDByIdent("SperreEvent", $eventsCat) === false)
+				$eid = IPS_CreateEvent(0);
+			else
+				$eid = IPS_GetObjectIDByIdent("SperreEvent", $eventsCat);
+			IPS_SetEventTrigger($eid, 4, $vid);
+			IPS_SetEventTriggerValue($eid, false);
+			IPS_SetEventScript($eid, "ESZS_CallScene(". $this->InstanceID .", ($sensorID *100));");
+			IPS_SetEventActive($eid, true);
+			IPS_SetParent($eid, $eventsCat);
+			IPS_SetName($eid, "Sperre.OnFalse");
+			IPS_SetIdent($eid, "SperreEvent");
+			
 			//Create Sensor Selection
 			//by its profile
 			// $sensorID = this->ReadPropertyInteger("Sensor");
