@@ -350,6 +350,16 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 							$reiterate = true;
 							$this->SetStatus('reiterating');
 						}
+						
+						//check if a Valid Name is set to this entry
+						if($entry['name'] == null || array_key_exists('ID', $entry) !== true)
+						{
+							//Set a new ID in case no ID was set
+							$data[$i]['name'] = rand(10000, 99999);
+							//tell the rest of the script to reload down the line with the new IDs
+							$reiterate = true;
+							$this->SetStatus('reiterating');
+						}
 					}
 
 					//reiterate the Modules apply changes function with the newly added IDs
