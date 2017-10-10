@@ -73,6 +73,10 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			// array_multisort($data, SORT_ASC, $d);
 			
 			for($i = 1; $i <= sizeof($data); $i++) {
+				if(array_key_exists('name', $data[$i - 1]) !== true)
+				{
+					$data[$i-1]['name'] = "Scene$i";
+				}
 				if(@IPS_GetObjectIDByIdent("Scene".$i, $this->InstanceID) === false){
 					//Scene
 					$vid = IPS_CreateVariable(1 /* Scene */);
