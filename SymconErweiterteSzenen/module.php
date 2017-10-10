@@ -334,27 +334,21 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 					foreach($data as $i => $entry)
 					{
 						//check if any positions were set
-						if(array_key_exists('Position', $entry))
+						if($entry['Position'] == 0 || array_key_exists('Position', $entry) !== true)
 						{
-							if($entry['Position'] == 0)
-							{
-								$data[$i]['Position'] = $i;
-								$reiterate = true;
-								$this->SetStatus('reiterating');
-							}
+							$data[$i]['Position'] = $i;
+							$reiterate = true;
+							$this->SetStatus('reiterating');
 						}
 
 						//check if a Valid ID is set to this entry
-						if(array_key_exists('ID', $entry))
+						if($entry['ID'] == 0 || $entry['ID'] == null || array_key_exists('ID', $entry) !== true)
 						{
-							if($entry['ID'] == 0 || $entry['ID'] == null)
-							{
-								//Set a new ID in case no ID was set
-								$data[$i]['ID'] = rand(10000, 99999);
-								//tell the rest of the script to reload down the line with the new IDs
-								$reiterate = true;
-								$this->SetStatus('reiterating');
-							}
+							//Set a new ID in case no ID was set
+							$data[$i]['ID'] = rand(10000, 99999);
+							//tell the rest of the script to reload down the line with the new IDs
+							$reiterate = true;
+							$this->SetStatus('reiterating');
 						}
 					}
 
