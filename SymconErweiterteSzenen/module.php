@@ -308,7 +308,7 @@ class SymconAlarmanlage extends IPSModule {
 			 $script .= "\$sensor = \$c; break;\n";
 			 $script .= "}\n";
 			 $script .= "}\n";
-			 $script .= "\$subject = \"Alarmanlage: \" . IPS_GetName(\$sensor) . \", (\" .  date(\"m.d.y\") . \" um \" . date(\"H:i:s\") .\")\";\n";
+			 $script .= "\$subject = \"Alarmanlage: \" . IPS_GetName(\$sensor) . \" (\" .  date(\"m.d.y\") . \" um \" . date(\"H:i:s\") .\")\";\n";
 			 $script .= "WFC_PushNotification($WebFrontID, 'Alarm', \$subject, '', 0); ";
 			 IPS_SetEventScript($tid, $script);
 			 IPS_SetEventCyclic($tid, 0 /* Keine Datumsüberprüfung */, 0, 0, 2, 1 /* Sekündlich */ , 30 /* Alle 30 Sekunden */);
@@ -343,7 +343,7 @@ class SymconAlarmanlage extends IPSModule {
                 $script .= "\$sensor = \$c; break;\n";
                 $script .= "}\n";
                 $script .= "}\n";
-                $script .= "\$subject = \"Alarmanlage: \" . IPS_GetName(\$sensor) . \", (\" .  date(\"m.d.y\") . \" um \" . date(\"H:i:s\") .\")\";\n";
+                $script .= "\$subject = \"Alarmanlage: \" . IPS_GetName(\$sensor) . \" (\" .  date(\"m.d.y\") . \" um \" . date(\"H:i:s\") .\")\";\n";
                 $script .= "SMTP_SendMail(IPS_GetProperty(". $this->InstanceID .", 'mail'), \$subject, \$subject);\n";
                 $script .= "}";    
              }
