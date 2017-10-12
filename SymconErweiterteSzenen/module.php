@@ -36,7 +36,10 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		
 		if($data != "")
 		{
-			IPS_SetPosition($this->InstanceID, -700);
+			$archivGUID = $this->GetModuleIDByName("Archive Control");
+			$archivIDs = (array) IPS_GetInstanceListByModuleID($archivGUID);
+			
+			IPS_SetPosition($this->InstanceID, 50);
 			
 			//Selector profile
 			if(IPS_VariableProfileExists("ESZS.Selector" . $this->InstanceID))
@@ -61,6 +64,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			{
 				$insID = IPS_GetObjectIDByIdent("Targets", IPS_GetParent($this->InstanceID));
 			}
+			IPS_SetPosition($insID, 40);
 			IPS_SetName($insID, "Targets");
 
 			if(@IPS_GetObjectIDByIdent("Targets", $this->InstanceID) !== false)
@@ -176,11 +180,13 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			}
 			$svs = IPS_GetObjectIDByIdent("SetValueScript", $this->InstanceID);
 			IPS_SetParent($vid, IPS_GetParent($this->InstanceID));
+			IPS_SetIcon($vid, "Rocket");
 			IPS_SetName($vid, IPS_GetName($this->InstanceID));
 			IPS_SetIdent($vid, "Selector");
-			IPS_SetPosition($vid, 600);
+			IPS_SetPosition($vid, 10);
 			IPS_SetVariableCustomProfile($vid, "ESZS.Selector" . $this->InstanceID);
 			IPS_SetVariableCustomAction($vid, $svs);
+			AC_SetLoggingStatus($archivIDs[0], $vid, true);
 			
 			//Create Selector event
 			if(@IPS_GetObjectIDByIdent("SelectorOnChange", $eventsCat) === false)
@@ -229,10 +235,11 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				$vid = IPS_GetObjectIDByIdent("Automatik", IPS_GetParent($this->InstanceID));
 			IPS_SetName($vid, "Automatik");
 			IPS_SetParent($vid, IPS_GetParent($this->InstanceID));
-			IPS_SetPosition($vid, -999);
+			IPS_SetPosition($vid, 20);
 			IPS_SetIdent($vid, "Automatik");
 			IPS_SetVariableCustomAction($vid, $svs);
-			IPS_SetVariableCustomProfile($vid, "~Switch");
+			IPS_SetVariableCustomProfile($vid, "Switch");
+			AC_SetLoggingStatus($archivIDs[0], $vid, true);
 			
 			//Create Event for Automatik
 			if(@IPS_GetObjectIDByIdent("AutomatikEvent", $eventsCat) === false)
@@ -254,10 +261,12 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				$vid = IPS_GetObjectIDByIdent("Sperre", IPS_GetParent($this->InstanceID));
 			IPS_SetName($vid, "Sperre");
 			IPS_SetParent($vid, IPS_GetParent($this->InstanceID));
-			IPS_SetPosition($vid, -999);
+			IPS_SetPosition($vid, 30);
 			IPS_SetIdent($vid, "Sperre");
 			IPS_SetVariableCustomAction($vid, $svs);
 			IPS_SetVariableCustomProfile($vid, "Switch");
+			AC_SetLoggingStatus($archivIDs[0], $vid, true);
+
 			//Create Event for Sperre
 			if(@IPS_GetObjectIDByIdent("SperreEvent", $eventsCat) === false)
 				$eid = IPS_CreateEvent(0);
@@ -296,9 +305,9 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				{
 					$insID = IPS_GetObjectIDByIdent("Set", IPS_GetParent($this->InstanceID));
 				}
-				IPS_SetName($insID, "DaySets");
+				IPS_SetName($insID, "Sensor");
 				IPS_SetParent($insID, IPS_GetParent($this->InstanceID));
-				IPS_SetPosition($insID, -500);
+				IPS_SetPosition($insID, 60);
 				IPS_SetIdent($insID, "Set");
 				
 				$sets = array("Früh","Morgen","Tag","Dämmerung","Abend","Nacht");
