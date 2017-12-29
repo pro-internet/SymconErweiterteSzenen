@@ -487,25 +487,29 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				//Set the actual values for the targets
 				foreach($data as $id => $value) {
 					if (IPS_VariableExists($id)){
-						
-						$o = IPS_GetObject($id);
-						$v = IPS_GetVariable($id);
-						if($v['VariableCustomAction'] > 0)
-							$actionID = $v['VariableCustomAction'];
-						else
-							$actionID = $v['VariableAction'];
-						
-						//Skip this device if we do not have a proper id
-						if($actionID < 10000)
+						//dont set the value if the target already has the desired value
+						if(GetValue($id) !== $value)
 						{
-							SetValue($id, $value);
-							continue;
-						}
+						
+							$o = IPS_GetObject($id);
+							$v = IPS_GetVariable($id);
+							if($v['VariableCustomAction'] > 0)
+								$actionID = $v['VariableCustomAction'];
+							else
+								$actionID = $v['VariableAction'];
 							
-						if(IPS_InstanceExists($actionID)) {
-							IPS_RequestAction($actionID, $o['ObjectIdent'], $value);
-						} else if(IPS_ScriptExists($actionID)) {
-							echo IPS_RunScriptWaitEx($actionID, Array("VARIABLE" => $id, "VALUE" => $value, "SENDER" => "WebFront"));
+							//Skip this device if we do not have a proper id
+							if($actionID < 10000)
+							{
+								SetValue($id, $value);
+								continue;
+							}
+								
+							if(IPS_InstanceExists($actionID)) {
+								IPS_RequestAction($actionID, $o['ObjectIdent'], $value);
+							} else if(IPS_ScriptExists($actionID)) {
+								echo IPS_RunScriptWaitEx($actionID, Array("VARIABLE" => $id, "VALUE" => $value, "SENDER" => "WebFront"));
+							}
 						}
 					}
 				}
