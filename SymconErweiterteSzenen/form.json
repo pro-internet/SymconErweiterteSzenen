@@ -21,10 +21,16 @@
 		 "name": "Position",
 		 "width": "50px",
 		 "add": 0,
-		 "visible": true,
-		 "edit": {
-		  	  "type": "ValidationTextBox"
-		  }
+		 "visible": false,
+		 "save": true
+		},
+		{
+		 "label": "ID",
+		 "name": "ID",
+		 "width": "50px",
+		 "add": 0,
+		 "visible": false,
+		 "save": true
 		}
 	  ]
 	},
