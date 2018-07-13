@@ -29,10 +29,9 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 	public function ApplyChanges() {
 		//Never delete this line!
 		parent::ApplyChanges();
-		echo "HÄH";
 		$this->RemoveExcessiveProfiles("ESZS.Selector");
 		$this->RemoveExcessiveProfiles("ESZS.Sets");
-		$data = wddx_deserialize($this->ReadPropertyString("Names"));
+		$data = $this->ReadPropertyString("Names");
 
 		print_r($data);
 		
