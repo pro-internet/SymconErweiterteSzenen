@@ -627,7 +627,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			foreach ($allScenes as $scene) {
 
 				$scI = GetValue($scene);
-				$scI = wddx_deserialize($scI, true);
+				$scI = wddx_deserialize($scI);
 
 				sort($scI);
 				sort($currentScene);
