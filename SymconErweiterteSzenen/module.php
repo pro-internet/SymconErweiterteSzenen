@@ -409,7 +409,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 
 
-		$this->setAllOnChangeEventsForHits();
+		//$this->setAllOnChangeEventsForHits();
 
 
 
