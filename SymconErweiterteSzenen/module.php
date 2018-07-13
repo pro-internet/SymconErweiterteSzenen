@@ -32,7 +32,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		
 		$this->RemoveExcessiveProfiles("ESZS.Selector");
 		$this->RemoveExcessiveProfiles("ESZS.Sets");
-		$data = json_decode($this->ReadPropertyString("Names"),true);
+		$data = wddx_deserialize($this->ReadPropertyString("Names"),true);
 
 
 		// UPDATE ÜBERWACHUNG //
@@ -532,7 +532,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 				$scene = GetValue($scene);
 
-				$ary = json_decode($scene);
+				$ary = wddx_deserialize($scene);
 
 				while ($element = current($ary)) {
 
@@ -617,7 +617,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			foreach ($allScenes as $scene) {
 
 				$scI = GetValue($scene);
-				$scI = json_decode($scI, true);
+				$scI = wddx_deserialize($scI, true);
 
 				sort($scI);
 				sort($currentScene);
@@ -720,7 +720,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				}
 			}
 		}
-		SetValue(IPS_GetObjectIDByIdent($SceneIdent."Data", $this->InstanceID), json_encode($data));
+		SetValue(IPS_GetObjectIDByIdent($SceneIdent."Data", $this->InstanceID), wddx_serialize_value($data));
 	}
 	private function CallValues($SceneIdent) {
 		
@@ -729,7 +729,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		if(strpos($SceneIdent, "Sensor") !== false) //sender = sensor
 			$actualIdent++;
 		$actualIdent = "Scene". $actualIdent;
-		$data = json_decode(GetValue(IPS_GetObjectIDByIdent($actualIdent."Data", $this->InstanceID)));
+		$data = wddx_deserialize(GetValue(IPS_GetObjectIDByIdent($actualIdent."Data", $this->InstanceID)));
 		if($data != NULL) {
 			if(strpos($SceneIdent, "Sensor") !== false)
 			{
