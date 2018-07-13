@@ -31,7 +31,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		parent::ApplyChanges();
 		$this->RemoveExcessiveProfiles("ESZS.Selector");
 		$this->RemoveExcessiveProfiles("ESZS.Sets");
-		$data = json_decode($this->ReadPropertyString("Names"));
+		$data = json_decode($this->ReadPropertyString("Names"), true);
 		
 		if($data != "")
 		{
