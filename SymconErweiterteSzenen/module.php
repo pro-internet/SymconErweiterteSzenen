@@ -33,6 +33,27 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		$this->RemoveExcessiveProfiles("ESZS.Selector");
 		$this->RemoveExcessiveProfiles("ESZS.Sets");
 		$data = json_decode($this->ReadPropertyString("Names"),true);
+
+
+		// UPDATE ÜBERWACHUNG //
+
+
+
+
+
+
+		$this->setAllOnChangeEventsForHits();
+
+
+
+
+
+
+
+
+
+		// ------------------------------------------------------------------------------------------------
+
 		
 		if($data != "")
 		{
@@ -394,6 +415,127 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			}
 		}
 	}
+
+
+
+	// Funktionen
+
+	// Prüft ob Variable bereits existiert und erstellt diese wenn nicht
+	public function checkVar ($var, $type = 1, $profile = false , $position = "", $index = 0, $defaultValue = null) {
+		if ($this->searchObjectByName($var) == 0) {
+			$nVar = $this->easyCreateVariable($type, $var ,$position, $index, $defaultValue);
+			if ($type == 0 && $profile == true) {
+				$this->addSwitch($nVar);
+			}
+			if ($type == 1 && $profile == true) {
+				$this->addTime($nVar);
+			}
+			if ($position != "") {
+				IPS_SetParent($nVar, $position);
+			}
+			if ($index != 0) {
+				IPS_SetPosition($nVar, $index);
+			}
+			return $nVar;
+		} else {
+			return $this->searchObjectByName($var);
+		}
+	}
+
+
+	// Sucht nach Objekt im angegebenem Ordner (wenn kein Ordner angegeben wird, wird das Modul selbst verwendet)
+	public function searchObjectByName ($name, $searchIn = null, $objectType = null) {
+
+		if ($searchIn == null) {
+			$searchIn = $this->InstanceID;
+		}
+
+		$childs = IPS_GetChildrenIDs($searchIn);
+		$returnId = 0;
+		foreach ($childs as $child) {
+			
+			$childObject = IPS_GetObject($child);
+			
+			if ($childObject['ObjectName'] == $name) {
+			
+				$returnId = $childObject['ObjectID'];
+		
+			}
+			if ($objectType == null) {
+				
+				if ($childObject['ObjectName'] == $name) {
+				
+					$returnId = $childObject['ObjectID'];
+
+				}
+
+		} else {
+
+			if ($childObject['ObjectName'] == $name && $childObject['ObjectType'] == $objectType) {
+				
+				$returnId = $childObject['ObjectID'];
+
+			}
+
+		}
+		}
+
+	return $returnId;
+	}
+
+	public function getAllElementsContainsName ($name, $si = null) {
+
+		if ($si == null) {
+
+			$si = $this->InstanceID;
+
+		}
+
+		$var = IPS_GetObject($si);
+
+		$hits = null;
+
+		foreach ($var['ChildrenIDs'] as $child) {
+
+			$chld = IPS_GetObject($child);
+
+			if (strpos($chld['ObjectName'], $name) !== false) {
+
+				$hits[] = $child;
+
+			}
+
+		}
+
+		return $hits;
+
+
+	}
+
+
+	protected function setAllOnChangeEventsForHits () {
+
+		$allScenes = $this->getAllElementsContainsName("Data");
+
+		if (count($allScenes) > 0) {
+
+			foreach ($allScenes as $scene) {
+
+				$scene = GetValue($scene);
+
+				print_r(json_decode($scene));
+
+			}
+
+		}
+
+	}
+
+
+
+
+
+
 	public function RequestAction($Ident, $Value) {
 		
 		switch($Value) {
