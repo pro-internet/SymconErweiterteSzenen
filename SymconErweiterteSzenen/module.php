@@ -563,7 +563,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 		$allEvents = $this->getAllElementsContainsName("-Event");
 
-		/*foreach ($allEvents as $event) {
+		foreach ($allEvents as $event) {
 
 			if ($this->doesExist($event)) {
 
@@ -571,8 +571,8 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 			}
 
-		}*/
-		print_r($allEvents);
+		}
+		//print_r($allEvents);
 
 
 	}
