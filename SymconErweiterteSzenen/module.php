@@ -544,7 +544,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 						//$this->easyCreateFunctionEvent($cElementObj['ObjectName'] . " Event", );
 
-						$this->easyCreateFunctionEvent($currentElement, "<?php ESZS_onTargetChanged(" . $this->InstanceID . ");" . " ?>", $this->InstanceID, $cElementObj['ObjectName'] . " Event");
+						$this->easyCreateFunctionEvent($currentElement, "<?php ESZS_onTargetChanged(" . $this->InstanceID . ");" . " ?>", $this->InstanceID, $cElementObj['ObjectName'] . "-Event");
 
 					}
 
