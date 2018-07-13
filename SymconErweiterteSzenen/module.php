@@ -534,6 +534,10 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 				$ary = wddx_deserialize($scene);
 
+				if ($ary == null) {
+					return;
+				}
+
 				while ($element = current($ary)) {
 
 					$currentElement = key($ary);
