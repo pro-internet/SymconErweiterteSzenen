@@ -565,7 +565,9 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 		foreach ($allEvents as $event) {
 
-			IPS_DeleteEvent($event);
+			if ($this->doesExist($event)) {
+				IPS_DeleteEvent($event);
+			}
 
 		}
 
