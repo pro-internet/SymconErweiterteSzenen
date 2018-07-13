@@ -705,10 +705,11 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 	public function SaveScene(int $SceneNumber){
 		
 		$this->SaveValues("Scene".$SceneNumber);
-		$this->setAllOnChangeEventsForHits();
 	}
 	private function SaveValues($SceneIdent) {
 		
+		$this->setAllOnChangeEventsForHits();
+
 		$targetIDs = IPS_GetObjectIDByIdent("Targets", IPS_GetParent($this->InstanceID));
 		$data = Array();
 		
