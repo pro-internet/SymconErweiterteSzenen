@@ -553,7 +553,65 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 	public function onTargetChanged () {
 		
-		print_r($_IPS);
+		$senderVar = $_IPS['VARIABLE'];
+
+		$actualState = GetValue($_IPS['VARIABLE']);
+
+		$allScenes = $this->getAllElementsContainsName("Data");
+
+		$allowedStates = null;
+
+		if (count($allScenes) > 0) {
+
+			foreach ($allScenes as $scene) {
+
+				$sceneInh = GetValue($scene);
+				$sceneInh = json_decode($sceneInh);
+
+				while ($currentElement = current($sceneInh)) {
+
+					if (key($sceneInh) == $senderVar) {
+
+						$allowedStates[] = $currentElement;
+
+					}
+
+					next($sceneInh);
+
+				}
+
+			}
+
+			$isInScene = false;
+
+			if (count($allowedStates) > 0) {
+
+				foreach ($allowedStates as $allowedState) {
+
+					if ($actualState == $allowedState) {
+
+						$isInScene = true;
+
+					}
+
+				}
+
+			}
+
+
+		}
+
+
+		if ($isInScene) {
+
+			echo "Is in a Scenes";
+
+		} else {
+
+			echo "Is not in a Scene!!!!";
+
+		}
+
 
 	}
 
