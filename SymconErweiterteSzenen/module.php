@@ -552,66 +552,64 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 	}
 
 	public function onTargetChanged () {
-		
-		$senderVar = $_IPS['VARIABLE'];
-
-		$actualState = GetValue($_IPS['VARIABLE']);
 
 		$allScenes = $this->getAllElementsContainsName("Data");
 
-		$allowedStates = null;
+		$targetsFolder = IPS_GetObjectIDByIdent("Targets");
+		
+		$targetsFolder = IPS_GetObject($targetsFolder);
 
 		if (count($allScenes) > 0) {
 
+			$currentScene = null;
+
+			$isValidScene = false;
+
+			foreach ($targetsFolder['ChildrenIDs'] as $tgChild) {
+
+				$tg = IPS_GetObject($tgChild);
+
+				if ($tg['ObjectType'] == 6) {
+
+					$lnk = IPS_GetLink($tg['ObjectID']);
+
+					$elem = IPS_GetObject($lnk['TargetID']);
+
+					$elemID = $elem['ObjectID'];
+
+					$currentScene[$elemID] = GetValue($elem['ObjectID']);
+
+				}
+
+			}
+
 			foreach ($allScenes as $scene) {
 
-				$sceneInh = GetValue($scene);
-				$sceneInh = json_decode($sceneInh);
+				$scI = GetValue($scene);
+				$scI = json_decode($scene);
 
-				while ($currentElement = current($sceneInh)) {
+				sort($scI);
+				sort($currentScene);
 
-					if (key($sceneInh) == $senderVar) {
+				if ($scI == $currentScene) {
 
-						$allowedStates[] = $currentElement;
-
-					}
-
-					next($sceneInh);
+					$isValidScene = true;
 
 				}
 
 			}
 
-			$isInScene = false;
+			if ($isValidScene) {
 
-			if (count($allowedStates) > 0) {
+				echo "IsValidScene!!!";
 
-				foreach ($allowedStates as $allowedState) {
+			} else {
 
-					if ($actualState == $allowedState) {
-
-						$isInScene = true;
-
-					}
-
-				}
+				echo "Is not a valid scene!!!!!!!";
 
 			}
 
-
 		}
-
-
-		if ($isInScene) {
-
-			echo "Is in a Scenes";
-
-		} else {
-
-			echo "Is not in a Scene!!!!";
-
-		}
-
 
 	}
 
