@@ -529,6 +529,8 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 					echo key($ary);
 
+					next($ary);
+
 				}
 
 			}
