@@ -624,6 +624,8 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 			}
 
+			$fittedSceneId = null;
+
 			foreach ($allScenes as $scene) {
 
 				$scI = GetValue($scene);
@@ -634,6 +636,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 				if ($scI == $currentScene) {
 
+					$fittedSceneId = $scene;
 					$isValidScene = true;
 
 				}
@@ -642,7 +645,10 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 			if ($isValidScene) {
 
-				
+				$sceneOBJ = IPS_GetObject($fittedSceneId);
+
+				$this->CallValues($sceneOBJ['ObjectIdent']);
+
 
 			} else {
 
