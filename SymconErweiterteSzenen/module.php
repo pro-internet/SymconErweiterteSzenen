@@ -344,6 +344,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				}
 				foreach($sets as $i => $state)
 				{
+					IPS_SetVariableProfileAssociation("ESZS.Sets" . $this->InstanceID, "Individuell", -10, "", -1);
 					IPS_SetVariableProfileAssociation("ESZS.Sets" . $this->InstanceID, $i, $state, "", -1);
 				}
 				//Create the variables
@@ -591,7 +592,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 				$scI = GetValue($scene);
 				$scI = json_decode($scI, true);
-				
+
 				//print_r($scI);
 
 				sort($scI);
@@ -607,11 +608,11 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 			if ($isValidScene) {
 
-				echo "IsValidScene!!!";
+				
 
 			} else {
 
-				echo "Is not a valid scene!!!!!!!";
+				
 
 			}
 
