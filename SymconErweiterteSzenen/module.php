@@ -32,7 +32,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		
 		$this->RemoveExcessiveProfiles("ESZS.Selector");
 		$this->RemoveExcessiveProfiles("ESZS.Sets");
-		$data = wddx_deserialize($this->ReadPropertyString("Names"),true);
+		$data = wddx_deserialize($this->ReadPropertyString("Names"));
 
 
 		// UPDATE ÜBERWACHUNG //
