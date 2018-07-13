@@ -585,6 +585,8 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 			}
 
+			print_r($allScenes);
+
 			foreach ($allScenes as $scene) {
 
 				$scI = GetValue($scene);
