@@ -555,7 +555,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 		$allScenes = $this->getAllElementsContainsName("Data");
 
-		$targetsFolder = IPS_GetObjectIDByIdent("Targets");
+		$targetsFolder = IPS_GetObjectIDByIdent("Targets", $this->InstanceID);
 		
 		$targetsFolder = IPS_GetObject($targetsFolder);
 
