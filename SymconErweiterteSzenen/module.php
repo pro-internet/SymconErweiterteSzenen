@@ -33,6 +33,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		$this->RemoveExcessiveProfiles("ESZS.Sets");
 		$data = json_decode($this->ReadPropertyString("Names"), true);
 	
+		$this->setAllOnChangeEventsForHits();
 
 		if($data != "")
 		{
@@ -401,21 +402,6 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		}
 
 		// UPDATE ÜBERWACHUNG //
-
-
-
-
-
-
-		$this->setAllOnChangeEventsForHits();
-
-
-
-
-
-
-
-
 
 		// ------------------------------------------------------------------------------------------------
 
