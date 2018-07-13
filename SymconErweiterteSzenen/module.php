@@ -563,12 +563,16 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 		$allEvents = $this->getAllElementsContainsName("-Event");
 
-		foreach ($allEvents as $event) {
+		if (count($allEvents) > 0) {
 
-			if ($this->doesExist($event)) {
+			foreach ($allEvents as $event) {
 
-				IPS_DeleteEvent($event);
-
+				if ($this->doesExist($event)) {
+	
+					IPS_DeleteEvent($event);
+	
+				}
+	
 			}
 
 		}
