@@ -34,6 +34,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		$this->RemoveExcessiveProfiles("ESZS.Sets");
 		$data = wddx_deserialize($this->ReadPropertyString("Names"));
 
+		print_r($data);
 		
 		if($data != "")
 		{
