@@ -501,11 +501,9 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 	protected function setAllOnChangeEventsForHits () {
 
-		echo "Set onChange Events";
+		//$this->deleteAllEvents();	
 
-		$allScenes = $this->getAllElementsContainsName("Data");
-
-		$this->deleteAllEvents();		
+		$allScenes = $this->getAllElementsContainsName("Data");	
 
 		if (count($allScenes) > 0) {
 
