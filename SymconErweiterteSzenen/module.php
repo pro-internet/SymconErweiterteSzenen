@@ -511,11 +511,11 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 				$sceneObj = IPS_GetObject($scene);
 
+				print_r($scene);
+
 				$scene = GetValue($scene);
 
-				$ary = (array) wddx_deserialize($scene);
-
-				print_r($ary);
+				$ary = wddx_deserialize($scene);
 
 				if ($ary == null) {
 					return;
