@@ -192,7 +192,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 			}
 
-			IPS_SetVariableProfileAssociation("ESZS.Selector" . $this->InstanceID, -20, "Individuell","",-1);
+			IPS_SetVariableProfileAssociation("ESZS.Selector" . $this->InstanceID, 100, "Individuell","",-1);
 
 			//Selector Variable
 			if(@IPS_GetObjectIDByIdent("Selector", IPS_GetParent($this->InstanceID)) === false)
@@ -522,6 +522,8 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 		$allScenes = $this->getAllElementsContainsName("Data");
 
+		$this->deleteAllEvents();		
+
 		if (count($allScenes) > 0) {
 
 			foreach ($allScenes as $scene) {
@@ -556,6 +558,21 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 	}
 
+
+	protected function deleteAllEvents () {
+
+		$allEvents = $this->getAllElementsContainsName("Event");
+
+		foreach ($allEvents as $event) {
+
+			IPS_DeleteEvent($event);
+
+		}
+
+
+	}
+
+
 	public function onTargetChanged () {
 
 		$allScenes = $this->getAllElementsContainsName("Data");
@@ -564,6 +581,8 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 		$targetsFolder = IPS_GetObjectIDByIdent("Targets", $prnt);
 		
+		$szenenVariable = IPS_GetObjectIDByIdent("Selector", $prnt);
+
 		$targetsFolder = IPS_GetObject($targetsFolder);
 
 		if (count($allScenes) > 0) {
@@ -616,7 +635,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 			} else {
 
-				
+				SetValue($szenenVariable, 100);
 
 			}
 
