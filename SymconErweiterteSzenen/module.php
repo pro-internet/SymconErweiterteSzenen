@@ -41,7 +41,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			$archivIDs = (array) IPS_GetInstanceListByModuleID($archivGUID);
 			
 			IPS_SetPosition($this->InstanceID, 50);
-			
+
 			//Selector profile
 			if(IPS_VariableProfileExists("ESZS.Selector" . $this->InstanceID))
 			{
@@ -172,7 +172,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 			}
 
-			IPS_SetVariableProfileAssociation("ESZS.Selector" . $this->InstanceID, 100, "Individuell","",-1);
+			//IPS_SetVariableProfileAssociation("ESZS.Selector" . $this->InstanceID, 100, "Individuell","",-1);
 
 			//Selector Variable
 			if(@IPS_GetObjectIDByIdent("Selector", IPS_GetParent($this->InstanceID)) === false)
@@ -409,7 +409,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 
 
-		//$this->setAllOnChangeEventsForHits();
+		$this->setAllOnChangeEventsForHits();
 
 
 
