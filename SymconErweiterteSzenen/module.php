@@ -37,6 +37,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		
 		if($data != "")
 		{
+			echo "data not null";
 			$archivGUID = $this->GetModuleIDByName("Archive Control");
 			$archivIDs = (array) IPS_GetInstanceListByModuleID($archivGUID);
 			
