@@ -728,7 +728,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				}
 			}
 		}
-		SetValue(IPS_GetObjectIDByIdent($SceneIdent."Data", $this->InstanceID), wddx_serialize_value($data));
+		SetValue(IPS_GetObjectIDByIdent($SceneIdent."Data", $this->InstanceID), wddx_serialize_vars($data));
 	}
 	private function CallValues($SceneIdent) {
 		
