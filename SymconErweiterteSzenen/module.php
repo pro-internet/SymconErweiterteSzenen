@@ -649,7 +649,9 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 				//$this->CallValues($sceneOBJ['ObjectIdent']);
 
-				$fittedVal = str_replace("Scene", "Data", $sceneOBJ['ObjectIdent']);
+				$fittedVal = str_replace("Scene", "", $sceneOBJ['ObjectIdent']);
+				$fittedVal = str_replace("Data", "", $fittedVal);
+				
 				$fittedVal = $fittedVal - 1;
 
 				SetValue($szenenVariable, $fittedVal);
