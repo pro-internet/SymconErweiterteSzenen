@@ -521,13 +521,25 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 			foreach ($allScenes as $scene) {
 
+				$sceneObj = IPS_GetObject($scene);
+
 				$scene = GetValue($scene);
 
 				$ary = json_decode($scene);
 
 				while ($element = current($ary)) {
 
-					echo key($ary);
+					$currentElement = key($ary);
+
+					$cElementObj = IPS_GetObject($currentElement);
+
+					if (!$this->doesExist($this->searchObjectByName($cElementObj['ObjectName'] . " Event"))) {
+
+						//$this->easyCreateFunctionEvent($cElementObj['ObjectName'] . " Event", );
+
+						$this->easyCreateFunctionEvent($currentElement, "<?php ESZS_onTargetChanged(" . $this->InstanceID . ");" . " ?>", $this->InstanceID, $cElementObj['ObjectName'] . " Event");
+
+					}
 
 					next($ary);
 
@@ -539,7 +551,35 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 	}
 
+	public function onTargetChanged () {
+		echo "WORKS";
+	}
 
+
+
+	public function easyCreateFunctionEvent ($target, $func, $parent = "", $name = "Unnamed Event") {
+		if ($parent == "") {
+			$parent = $this->InstanceID;
+		}
+		$eid = IPS_CreateEvent(0);
+		IPS_setEventTrigger($eid, 0, $target);
+		IPS_SetParent($eid, $parent);
+		IPS_SetEventScript($eid, $func);
+		IPS_SetName($eid, $name);
+		IPS_SetEventActive($eid, true); 
+		return $eid;
+	} 
+
+
+	public function doesExist ($id) {
+		if (IPS_ObjectExists($id) && $id != 0) {
+			
+			return true;
+		} else {
+			return false;
+		
+		}
+	}
 
 
 
