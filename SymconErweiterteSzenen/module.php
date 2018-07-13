@@ -31,13 +31,11 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		parent::ApplyChanges();
 		$this->RemoveExcessiveProfiles("ESZS.Selector");
 		$this->RemoveExcessiveProfiles("ESZS.Sets");
-		$data = $this->ReadPropertyString("Names");
-
-		print_r($data);
+		$data = json_decode($this->ReadPropertyString("Names"));
 		
 		if($data != "")
 		{
-			echo "data not null";
+
 			$archivGUID = $this->GetModuleIDByName("Archive Control");
 			$archivIDs = (array) IPS_GetInstanceListByModuleID($archivGUID);
 			
@@ -173,7 +171,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 			}
 
-			//IPS_SetVariableProfileAssociation("ESZS.Selector" . $this->InstanceID, 100, "Individuell","",-1);
+			IPS_SetVariableProfileAssociation("ESZS.Selector" . $this->InstanceID, 100, "Individuell","",-1);
 
 			//Selector Variable
 			if(@IPS_GetObjectIDByIdent("Selector", IPS_GetParent($this->InstanceID)) === false)
