@@ -189,7 +189,11 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				
 				//Set Selector profile
 				IPS_SetVariableProfileAssociation("ESZS.Selector" . $this->InstanceID, ($i-1), $data[$i - 1]['name'],"",-1);
+
 			}
+
+			IPS_SetVariableProfileAssociation("ESZS.Selector" . $this->InstanceID, -20, "Individuell","",-1);
+
 			//Selector Variable
 			if(@IPS_GetObjectIDByIdent("Selector", IPS_GetParent($this->InstanceID)) === false)
 			{
@@ -342,9 +346,9 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 				{
 					IPS_CreateVariableProfile("ESZS.Sets" . $this->InstanceID, 1);
 				}
+			
 				foreach($sets as $i => $state)
 				{
-					IPS_SetVariableProfileAssociation("ESZS.Sets" . $this->InstanceID, "Individuell", -10, "", -1);
 					IPS_SetVariableProfileAssociation("ESZS.Sets" . $this->InstanceID, $i, $state, "", -1);
 				}
 				//Create the variables
