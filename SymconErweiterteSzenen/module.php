@@ -552,7 +552,9 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 	}
 
 	public function onTargetChanged () {
-		echo "WORKS";
+		
+		print_r($_IPS['SENDER']);
+
 	}
 
 
