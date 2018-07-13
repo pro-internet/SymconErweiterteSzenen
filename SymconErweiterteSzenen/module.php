@@ -32,8 +32,6 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 		$this->RemoveExcessiveProfiles("ESZS.Selector");
 		$this->RemoveExcessiveProfiles("ESZS.Sets");
 		$data = json_decode($this->ReadPropertyString("Names"), true);
-	
-		$this->setAllOnChangeEventsForHits();
 
 		if($data != "")
 		{
@@ -399,14 +397,9 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 					IPS_DeleteVariable($autoVar);
 				}
 			}
+
+			$this->setAllOnChangeEventsForHits();
 		}
-
-		// UPDATE ÜBERWACHUNG //
-
-		// ------------------------------------------------------------------------------------------------
-
-
-
 	}
 
 
@@ -507,6 +500,8 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 
 	protected function setAllOnChangeEventsForHits () {
+
+		echo "Set onChange Events";
 
 		$allScenes = $this->getAllElementsContainsName("Data");
 
