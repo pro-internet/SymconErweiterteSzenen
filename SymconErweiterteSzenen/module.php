@@ -590,8 +590,8 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 			foreach ($allScenes as $scene) {
 
 				$scI = GetValue($scene);
-				$scI = json_decode($scI);
-
+				$scI = json_decode($scI, true);
+				
 				//print_r($scI);
 
 				sort($scI);
