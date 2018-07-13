@@ -540,7 +540,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 					$cElementObj = IPS_GetObject($currentElement);
 
-					if (!$this->doesExist($this->searchObjectByName($cElementObj['ObjectName'] . " Event"))) {
+					if (!$this->doesExist($this->searchObjectByName($cElementObj['ObjectName'] . "-Event"))) {
 
 						//$this->easyCreateFunctionEvent($cElementObj['ObjectName'] . " Event", );
 
@@ -561,7 +561,7 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 	protected function deleteAllEvents () {
 
-		$allEvents = $this->getAllElementsContainsName("Event");
+		$allEvents = $this->getAllElementsContainsName("-Event");
 
 		/*foreach ($allEvents as $event) {
 
