@@ -505,6 +505,8 @@ class ErweiterteSzenenSteuerung extends IPSModule {
 
 		$allScenes = $this->getAllElementsContainsName("Data");	
 
+		print_r($allScenes);
+
 		if (count($allScenes) > 0) {
 
 			foreach ($allScenes as $scene) {
